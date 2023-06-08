@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIndicator, TextInput, Alert } from 'react-native';
 import { Modal } from 'react-native-paper';
-import { MaterialCommunityIcons, FontAwesome, FontAwesome5, AntDesign, MaterialIcons, onSnapshot } from '@expo/vector-icons';
+import { MaterialCommunityIcons, FontAwesome, FontAwesome5, AntDesign, MaterialIcons } from '@expo/vector-icons';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, collection, addDoc, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, getDocs, onSnapshot, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import app from '../../../config/firebase';
 import { useSelector } from 'react-redux';
 import { selectCroplyFolder } from '../../redux/slices/setting';
+import { DeleteStyles } from '../../StyleSheet/YearlyFolder';
 const auth = getAuth(app);
 const db = getFirestore();
 
@@ -185,12 +186,58 @@ const CropMenu = ({ showCropMenu, onConfirm, onCancel }) => {
         )
     }
 };
-
 const CropsFolder = (props) => {
     const id = useSelector(state => state.userAuth.id);
     const CropsDocumentPath = `Traders/${id}/Farmer/${props.route.params.farmerId}/Yearly/${props.route.params.yearId}/Crops/`;
     const folderDetails = collection(db, CropsDocumentPath);
     const [showCropMenu, setShowCropMenu] = useState(false);
+    const [DeleteFolderInfo, setDeleteFolderInfo] = useState(false);
+    const [folderId, setFolderId] = useState();
+    const DeleteFolder = ({ isVisible, setVisible, path, folderId }) => {
+        const [isLoading, setLoading] = useState(false); // Added isLoading state
+        const deleteIt = async () => {
+            setLoading(true);
+            try {
+                const farmerRef = doc(db, path, folderId);
+                await deleteDoc(farmerRef);
+                setVisible(false);
+                Alert.alert('ફોલ્ડર હટાવાયું.. ')
+                setLoading(false);
+            } catch (error) {
+                console.log(error);
+                alert('Server is Busy...');
+                setLoading(false);
+            }
+            finally {
+                //  naviation.navigate('Dashboard')
+            }
+        };
+
+        return (
+            <Modal animationType="slide" visible={isVisible} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <View style={DeleteStyles.container}>
+                    <TouchableOpacity onPress={() => setVisible(false)} style={{
+                        position: 'absolute',
+                        top: 10,
+                        right: 10,
+                        backgroundColor: '#1F242B',
+                        padding: 6,
+                        borderRadius: 20
+                    }} >
+                        <AntDesign name='close' size={18} color='#fff' />
+                    </TouchableOpacity>
+                    <FontAwesome name='warning' size={80} color={'#E57158'} />
+                    <Text style={{ marginTop: 10, fontSize: 26, color: '#fff', fontWeight: 'bold' }}>Are you Sure..?</Text>
+                    <Text style={{ marginVertical: 10, fontSize: 15, color: '#fff', fontWeight: '400', opacity: .8, width: '70%', textAlign: 'center' }}>Do you really want to delete this farmer? This Process cannot be undone</Text>
+                    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginTop: 10 }}>
+                        <TouchableOpacity style={DeleteStyles.button} onPress={() => setVisible(false)}><Text style={DeleteStyles.buttonText}>Cancel</Text></TouchableOpacity>
+                        <TouchableOpacity style={[DeleteStyles.button, { backgroundColor: '#E57158', borderColor: '#E57158' }]} onPress={deleteIt}><Text style={DeleteStyles.buttonText}>{isLoading ? <ActivityIndicator color={'#fff'} /> : 'Delete It!'}</Text></TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+        );
+    };
+
     const onConfirm = (item) => {
         setShowCropMenu(false);
         addDoc(folderDetails, item)
@@ -210,70 +257,121 @@ const CropsFolder = (props) => {
         const [loading, setLoading] = useState(true);
         const [folders, setFolder] = useState([]);
         const usersRef = collection(db, CropsDocumentPath);
+        const farmerRef = collection(db, `Traders/${id}/Farmer/${props.route.params.farmerId}/Yearly`);
+        const YearlyDocumentPath = `Traders/${id}/Farmer/${props.route.params.farmerId}/Yearly`;
+        const YearlyDoc = doc(db, YearlyDocumentPath, props.route.params.yearId);
         useEffect(() => {
-            const unsubscribe = onSnapshot(usersRef, (querySnapshot) => {
-                if (!querySnapshot.empty) {
-                    const folderDocs = querySnapshot.docs.map((doc) => ({
-                        id: doc.id,
-                        data: doc.data(),
-                    }));
-                    setFolder(folderDocs);
-                } else {
-                    setFolder([]);
+            const fetchData = async () => {
+                try {
+                    const folderQuerySnapshot = await getDocs(usersRef);
+                    if (!folderQuerySnapshot.empty) {
+                        const folderDocs = folderQuerySnapshot.docs.map((doc) => ({
+                            id: doc.id,
+                            data: doc.data(),
+                        }));
+                        setFolder(folderDocs);
+                        const balanceSum = folderDocs.reduce((sum, folder) => sum + parseInt(folder.data.Balance), 0); // Convert balanceSum to a number
+                        const YearlyfolderQuerySnapshot = await getDocs(farmerRef);
+                        if (!YearlyfolderQuerySnapshot.empty) {
+                            const YearDocs = YearlyfolderQuerySnapshot.docs.map((doc) => ({
+                                id: doc.id,
+                                data: doc.data(),
+                            }));
+                            const selectedData = YearDocs.find((item) => item.id === props.route.params.yearId).data;
+                            if (selectedData != undefined) {
+                                const updatedData = { ...selectedData, Balance: balanceSum };
+                                try {
+                                    await updateDoc(YearlyDoc, updatedData);
+                                } catch (error) {
+                                    console.error('Error updating farmer data:', error);
+                                }
+                            }
+                        }
+                    } else {
+                        const YearlyfolderQuerySnapshot = await getDocs(farmerRef);
+                        if (!YearlyfolderQuerySnapshot.empty) {
+                            const YearDocs = YearlyfolderQuerySnapshot.docs.map((doc) => ({
+                                id: doc.id,
+                                data: doc.data(),
+                            }));
+                            const selectedData = YearDocs.find((item) => item.id === props.route.params.yearId).data;
+                            if (selectedData != undefined) {
+                                const updatedData = { ...selectedData, Balance: 0 };
+                                try {
+                                    await updateDoc(YearlyDoc, updatedData);
+                                } catch (error) {
+                                    console.error('Error updating farmer data:', error);
+                                }
+                            }
+                        }
+                        setFolder([]);
+                    }
+
+                    setLoading(false);
+                } catch (error) {
+                    console.error('Error retrieving data:', error);
+                    setLoading(false);
                 }
-                setLoading(false);
+            };
+
+            const unsubscribe = onSnapshot(usersRef, () => {
+                fetchData();
             }, (error) => {
                 console.error('Error retrieving user data:', error);
                 setLoading(false);
             });
 
+            fetchData(); // Fetch initial data
+
             return () => {
                 unsubscribe();
             };
         }, []);
-
         if (loading) {
             return <ActivityIndicator color="#FFFFFF" />;
         }
-        return <></>
-        // return (
-        //     <ScrollView
-        //         endFillColor="#31363C"
-        //         showsVerticalScrollIndicator={false}
-        //         overScrollMode="never"
-        //         contentContainerStyle={styles.scrollViewContent} // Added container style for flex wrapping
-        //     >
-        //         {!folders.length ?
-        //             <View style={{ flex: 1, height: 400, justifyContent: 'center', alignItems: 'center' }}>
-        //                 <MaterialCommunityIcons name='emoticon-dead-outline' size={50} color={'#E57158'} />
-        //                 <Text style={{ color: '#E57158', fontWeight: 'bold', letterSpacing: 1, fontSize: 24, marginBottom: 10 }}>Oops.!! </Text>
-        //                 <Text style={{ color: '#E57158', fontWeight: 'bold', letterSpacing: 1 }}>કોય ફોલ્ડર ઉપલપદ્ધ નથી.. </Text>
-        //             </View> :
-        //             folders.map((folder, index) => (
-        //                 <TouchableOpacity
-        //                     key={index}
-        //                     onPress={() => props.navigation.navigate('Invoice', { path: `${CropsDocumentPath}${folder.id}`, crop: folder.data.name, year: props.route.params.year })}
-        //                     style={{ paddingRight: 8, display: 'flex', justifyContent: 'center', width: 80, alignItems: 'center' }}>
-        //                     <MaterialCommunityIcons name="folder" color={folder.data.Balance == 0 ? '#7DAFEA' : folder.data.Balance < 0 ? '#E57158' : '#79B046'} style={styles.icon} />
-        //                     <Image
-        //                         source={{
-        //                             uri:
-        //                                 `https://raw.githubusercontent.com/AJAX-Codder/cultivator/master/assets/crops/${folder.data.icon}`,
-        //                         }}
-        //                         style={{ position: 'absolute', right: 20, width: 20, height: 20 }}
-        //                     />
+        return (
+            <ScrollView
+                endFillColor="#31363C"
+                showsVerticalScrollIndicator={false}
+                overScrollMode="never"
+                contentContainerStyle={styles.scrollViewContent} // Added container style for flex wrapping
+            >
+                {!folders.length ?
+                    <View style={{ flex: 1, height: 400, justifyContent: 'center', alignItems: 'center' }}>
+                        <MaterialCommunityIcons name='emoticon-dead-outline' size={50} color={'#E57158'} />
+                        <Text style={{ color: '#E57158', fontWeight: 'bold', letterSpacing: 1, fontSize: 24, marginBottom: 10 }}>Oops.!! </Text>
+                        <Text style={{ color: '#E57158', fontWeight: 'bold', letterSpacing: 1 }}>કોય ફોલ્ડર ઉપલપદ્ધ નથી.. </Text>
+                    </View> :
+                    folders.map((folder, index) => (
+                        <TouchableOpacity
+                            onLongPress={() => {
+                                setFolderId(folder.id);
+                                setDeleteFolderInfo(true)
+                            }}
+                            key={index}
+                            onPress={() => props.navigation.navigate('Invoice', { path: `${CropsDocumentPath}${folder.id}`, crop: folder.data.name, year: props.route.params.year })}
+                            style={{ paddingRight: 8, display: 'flex', justifyContent: 'center', width: 80, alignItems: 'center' }}>
+                            <MaterialCommunityIcons name="folder" color={folder.data.Balance == 0 ? '#7DAFEA' : folder.data.Balance < 0 ? '#E57158' : '#79B046'} style={styles.icon} />
+                            <Image
+                                source={{
+                                    uri:
+                                        `https://raw.githubusercontent.com/AJAX-Codder/cultivator/master/assets/crops/${folder.data.icon}`,
+                                }}
+                                style={{ position: 'absolute', right: 20, width: 20, height: 20 }}
+                            />
 
-        //                     <Text style={{ color: '#fff', fontWeight: 'bold', letterSpacing: 1 }}>{folder.data.name}</Text>
-        //                 </TouchableOpacity>
-        //             ))
-        //         }
-        //     </ScrollView>
-        // );
+                            <Text style={{ color: '#fff', fontWeight: 'bold', letterSpacing: 1 }}>{folder.data.name}</Text>
+                        </TouchableOpacity>
+                    ))
+                }
+            </ScrollView>
+        );
     };
 
     return (
         <View style={styles.container}>
-            {/* <View style={styles.header}>
+            <View style={styles.header}>
                 <TouchableOpacity onPress={() => props.navigation.navigate('Dashboard')}>
                     <Text style={styles.headerText}>ખેડૂતમિત્રો</Text>
                 </TouchableOpacity>
@@ -297,7 +395,8 @@ const CropsFolder = (props) => {
                 showCropMenu={showCropMenu}
                 onConfirm={onConfirm}
                 onCancel={onCancel}
-            /> */}
+            />
+            <DeleteFolder isVisible={DeleteFolderInfo} setVisible={setDeleteFolderInfo} path={CropsDocumentPath} folderId={folderId} />
         </View>
     );
 };

@@ -406,7 +406,6 @@ export const YearlyFolder = (props) => {
     /*  Delete Farmer*/
     const DeleteFolder = ({ isVisible, setVisible, path, folderId }) => {
         const [isLoading, setLoading] = useState(false); // Added isLoading state
-        const naviation = useNavigation()
         const deleteIt = async () => {
             setLoading(true);
             try {
@@ -451,12 +450,11 @@ export const YearlyFolder = (props) => {
     };
     const Folder = ({ path }) => {
         const [folders, setFolder] = useState([]);
-        const [loading, setLoading] = useState(false);
+        const [loading, setLoading] = useState(true);
         const usersRef = collection(db, path);
         // setSum(balanceSum)
         const FarmerDocumentPath = `Traders/${id}/Farmer`;
         const farmerDoc = doc(db, FarmerDocumentPath, farmerId);
-
         const farmerRef = collection(db, `Traders/${id}/Farmer/`);
         useEffect(() => {
             const fetchData = async () => {
