@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
 import { Modal } from 'react-native-paper';
-import { MaterialCommunityIcons, FontAwesome, FontAwesome5, AntDesign, MaterialIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, FontAwesome, FontAwesome5, AntDesign, MaterialIcons, onSnapshot } from '@expo/vector-icons';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs } from 'firebase/firestore';
 import app from '../../../config/firebase';
@@ -192,83 +192,88 @@ const CropsFolder = (props) => {
     const folderDetails = collection(db, CropsDocumentPath);
     const [showCropMenu, setShowCropMenu] = useState(false);
     const onConfirm = (item) => {
-        setShowCropMenu(false)
-        addDoc(collection(db, CropsDocumentPath), item)
+        setShowCropMenu(false);
+        addDoc(folderDetails, item)
             .then(() => {
-                alert(` successfully ${item.name} Folder Created.. `);
+                alert(`Successfully created ${item.name} folder.`);
             })
             .catch((error) => {
-                alert("Server is Busy...");
-                // Handle the error appropriately (e.g., display an error message).
-            })
-            .finally(() => {
-                //   setLoading(false); // Set loading state to false
+                alert('Server is busy...');
+
             });
-    }
+    };
+
     const onCancel = () => {
         setShowCropMenu(false)
     }
     const Folder = () => {
         const [loading, setLoading] = useState(true);
         const [folders, setFolder] = useState([]);
+        const usersRef = collection(db, CropsDocumentPath);
         useEffect(() => {
-            getDocs(folderDetails)
-                .then((querySnapshot) => {
-                    if (!querySnapshot.empty) {
-                        const folderDocs = querySnapshot.docs.map((doc) => ({
-                            id: doc.id, // Store the document ID as the 'id' property
-                            data: doc.data(), // Store the document data as the 'data' property
-                        })); // Sort the farmers based on their names in ascending order
-                        setFolder(folderDocs);
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error retrieving user data:', error);
-                }).finally(() => {
-                    setLoading(false); // Set loading to false when data is fetched
-                });
+            const unsubscribe = onSnapshot(usersRef, (querySnapshot) => {
+                if (!querySnapshot.empty) {
+                    const folderDocs = querySnapshot.docs.map((doc) => ({
+                        id: doc.id,
+                        data: doc.data(),
+                    }));
+                    setFolder(folderDocs);
+                } else {
+                    setFolder([]);
+                }
+                setLoading(false);
+            }, (error) => {
+                console.error('Error retrieving user data:', error);
+                setLoading(false);
+            });
+
+            return () => {
+                unsubscribe();
+            };
         }, []);
+
         if (loading) {
             return <ActivityIndicator color="#FFFFFF" />;
         }
-        return (
-            <ScrollView
-                endFillColor="#31363C"
-                showsVerticalScrollIndicator={false}
-                overScrollMode="never"
-                contentContainerStyle={styles.scrollViewContent} // Added container style for flex wrapping
-            >
-                {!folders.length ?
-                    <View style={{ flex: 1, height: 400, justifyContent: 'center', alignItems: 'center' }}>
-                        <MaterialCommunityIcons name='emoticon-dead-outline' size={50} color={'#E57158'} />
-                        <Text style={{ color: '#E57158', fontWeight: 'bold', letterSpacing: 1, fontSize: 24, marginBottom: 10 }}>Oops.!! </Text>
-                        <Text style={{ color: '#E57158', fontWeight: 'bold', letterSpacing: 1 }}>કોય ફોલ્ડર ઉપલપદ્ધ નથી.. </Text>
-                    </View> :
-                    folders.map((folder, index) => (
-                        <TouchableOpacity
-                            key={index}
-                            onPress={() => props.navigation.navigate('Invoice', { path: `${CropsDocumentPath}${folder.id}`, crop: folder.data.name, year: props.route.params.year })}
-                            style={{ paddingRight: 8, display: 'flex', justifyContent: 'center', width: 80, alignItems: 'center' }}>
-                            <MaterialCommunityIcons name="folder" color={folder.data.Balance == 0 ? '#7DAFEA' : folder.data.Balance < 0 ? '#E57158' : '#79B046'} style={styles.icon} />
-                            <Image
-                                source={{
-                                    uri:
-                                        `https://raw.githubusercontent.com/AJAX-Codder/cultivator/master/assets/crops/${folder.data.icon}`,
-                                }}
-                                style={{ position: 'absolute', right: 20, width: 20, height: 20 }}
-                            />
+        return <></>
+        // return (
+        //     <ScrollView
+        //         endFillColor="#31363C"
+        //         showsVerticalScrollIndicator={false}
+        //         overScrollMode="never"
+        //         contentContainerStyle={styles.scrollViewContent} // Added container style for flex wrapping
+        //     >
+        //         {!folders.length ?
+        //             <View style={{ flex: 1, height: 400, justifyContent: 'center', alignItems: 'center' }}>
+        //                 <MaterialCommunityIcons name='emoticon-dead-outline' size={50} color={'#E57158'} />
+        //                 <Text style={{ color: '#E57158', fontWeight: 'bold', letterSpacing: 1, fontSize: 24, marginBottom: 10 }}>Oops.!! </Text>
+        //                 <Text style={{ color: '#E57158', fontWeight: 'bold', letterSpacing: 1 }}>કોય ફોલ્ડર ઉપલપદ્ધ નથી.. </Text>
+        //             </View> :
+        //             folders.map((folder, index) => (
+        //                 <TouchableOpacity
+        //                     key={index}
+        //                     onPress={() => props.navigation.navigate('Invoice', { path: `${CropsDocumentPath}${folder.id}`, crop: folder.data.name, year: props.route.params.year })}
+        //                     style={{ paddingRight: 8, display: 'flex', justifyContent: 'center', width: 80, alignItems: 'center' }}>
+        //                     <MaterialCommunityIcons name="folder" color={folder.data.Balance == 0 ? '#7DAFEA' : folder.data.Balance < 0 ? '#E57158' : '#79B046'} style={styles.icon} />
+        //                     <Image
+        //                         source={{
+        //                             uri:
+        //                                 `https://raw.githubusercontent.com/AJAX-Codder/cultivator/master/assets/crops/${folder.data.icon}`,
+        //                         }}
+        //                         style={{ position: 'absolute', right: 20, width: 20, height: 20 }}
+        //                     />
 
-                            <Text style={{ color: '#fff', fontWeight: 'bold', letterSpacing: 1 }}>{folder.data.name}</Text>
-                        </TouchableOpacity>
-                    ))
-                }
-            </ScrollView>
-        );
+        //                     <Text style={{ color: '#fff', fontWeight: 'bold', letterSpacing: 1 }}>{folder.data.name}</Text>
+        //                 </TouchableOpacity>
+        //             ))
+        //         }
+        //     </ScrollView>
+        // );
     };
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
+            {/* <View style={styles.header}>
                 <TouchableOpacity onPress={() => props.navigation.navigate('Dashboard')}>
                     <Text style={styles.headerText}>ખેડૂતમિત્રો</Text>
                 </TouchableOpacity>
@@ -292,7 +297,7 @@ const CropsFolder = (props) => {
                 showCropMenu={showCropMenu}
                 onConfirm={onConfirm}
                 onCancel={onCancel}
-            />
+            /> */}
         </View>
     );
 };

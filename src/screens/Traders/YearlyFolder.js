@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIn
 import { MaterialCommunityIcons, FontAwesome, FontAwesome5, MaterialIcons, AntDesign, Entypo } from '@expo/vector-icons';
 import { Modal } from 'react-native-paper';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, deleteDoc, setDoc, doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { getFirestore, collection, deleteDoc, getDocs, setDoc, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 // import { selectFarmer, selectFolder } from '../../redux/slices/farmerSlice';
 import app from '../../../config/firebase';
 import { useSelector, useDispatch } from 'react-redux';
@@ -25,6 +25,9 @@ export const YearlyFolder = (props) => {
     const [ViewInfo, setViewInfo] = useState(false);
     const [UpdateInfo, setUpdateInfo] = useState(false);
     const [DeleteInfo, setDeleteInfo] = useState(false);
+    const [DeleteFolderInfo, setDeleteFolderInfo] = useState(false);
+    const [folderId, setFolderId] = useState();
+    const [sum, setSum] = useState(0);
     const navigation = useNavigation();
     const dispatch = useDispatch();
     const openCalendar = () => {
@@ -60,6 +63,7 @@ export const YearlyFolder = (props) => {
     const ViewFarmerInfo = ({ isVisible, setVisible, path, farmerId }) => {
         const usersRef = collection(db, path);
         const [selectedFarmer, setSelectedFarmer] = useState({ data: {} });
+        const [isLoading, setLoading] = useState(true);
         useEffect(() => {
             const unsubscribe = onSnapshot(usersRef, (querySnapshot) => {
                 if (!querySnapshot.empty) {
@@ -69,7 +73,10 @@ export const YearlyFolder = (props) => {
                     }));
                     const selectedData = FarmerDocs.find(item => item.id === farmerId);
                     setSelectedFarmer(selectedData)
+                    setLoading(false)
                 }
+                else
+                    setLoading(false)
             }, (error) => {
                 console.error('Error retrieving user data:', error);
                 // setLoading(false)
@@ -78,82 +85,85 @@ export const YearlyFolder = (props) => {
         }, []);
         return (
             <Modal animationType="slide" visible={isVisible} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                {selectedFarmer != undefined ? <View style={ReadFarmerStyles.container}>
-                    <TouchableOpacity onPress={() => setVisible(false)} style={{
-                        position: 'absolute',
-                        top: 10,
-                        right: 10,
-                        backgroundColor: '#1F242B',
-                        padding: 6,
-                        borderRadius: 20
-                    }} >
-                        <AntDesign name='close' size={18} color='#fff' />
-                    </TouchableOpacity>
+                {
+                    isLoading ?
+                        <View style={ReadFarmerStyles.container}><ActivityIndicator color={"#fff"} /></View> :
+                        selectedFarmer != undefined ? <View style={ReadFarmerStyles.container}>
+                            <TouchableOpacity onPress={() => setVisible(false)} style={{
+                                position: 'absolute',
+                                top: 10,
+                                right: 10,
+                                backgroundColor: '#1F242B',
+                                padding: 6,
+                                borderRadius: 20
+                            }} >
+                                <AntDesign name='close' size={18} color='#fff' />
+                            </TouchableOpacity>
 
-                    <Image source={{ uri: selectedFarmer.data.Image }} style={{
-                        marginTop: 50, marginBottom: 20, width: 120, height: 120, borderRadius: 120, borderWidth: 5, borderColor: '#fff'
-                    }} />
-                    <View style={ReadFarmerStyles.inputContainer}>
-                        <View style={[ReadFarmerStyles.input_group]}>
-                            <FontAwesome5 name="user-tie" size={28} color="#fff" style={{
-                                paddingHorizontal: 8
+                            <Image source={{ uri: selectedFarmer.data.Image }} style={{
+                                marginTop: 50, marginBottom: 20, width: 120, height: 120, borderRadius: 120, borderWidth: 5, borderColor: '#fff'
                             }} />
-                            <TextInput
-                                style={ReadFarmerStyles.input}
-                                placeholder="ખેડૂતનામ "
-                                value={selectedFarmer.data.Name}
-                                placeholderTextColor="#BDBFC2"
+                            <View style={ReadFarmerStyles.inputContainer}>
+                                <View style={[ReadFarmerStyles.input_group]}>
+                                    <FontAwesome5 name="user-tie" size={28} color="#fff" style={{
+                                        paddingHorizontal: 8
+                                    }} />
+                                    <TextInput
+                                        style={ReadFarmerStyles.input}
+                                        placeholder="ખેડૂતનામ "
+                                        value={selectedFarmer.data.Name}
+                                        placeholderTextColor="#BDBFC2"
 
-                            />
-                        </View>
-                        <View style={[ReadFarmerStyles.input_group]}>
-                            <FontAwesome5 name="map-marked-alt" size={24} color="#fff" style={{
-                                paddingHorizontal: 8
-                            }} />
-                            <TextInput
-                                style={ReadFarmerStyles.input}
-                                placeholder="ગામ  "
-                                value={selectedFarmer.data.Village}
-                                placeholderTextColor="#BDBFC2"
-                            />
-                        </View>
-                        <View style={[ReadFarmerStyles.input_group]}>
-                            <Entypo name="old-phone" size={28} color="#fff" style={{
-                                paddingHorizontal: 8
-                            }} />
-                            <TextInput
-                                style={ReadFarmerStyles.input}
-                                placeholder="0000000000"
-                                value={selectedFarmer.data.MobileNo}
-                                placeholderTextColor="#BDBFC2"
-                            />
-                        </View>
-                        <View style={[ReadFarmerStyles.input_group]}>
-                            <FontAwesome name="rupee" size={28} color="#fff" style={{
-                                paddingHorizontal: 15
-                            }} />
-                            <TextInput
-                                style={ReadFarmerStyles.input}
-                                placeholder="0000000000"
-                                value={selectedFarmer.data.Balance && selectedFarmer.data.Balance.toString()}
-                                placeholderTextColor="#BDBFC2"
-                            />
-                        </View>
-                    </View>
-                </View> :
-                    <View style={ReadFarmerStyles.container}>
-                        <TouchableOpacity onPress={() => setVisible(false)} style={{
-                            position: 'absolute',
-                            top: 10,
-                            right: 10,
-                            backgroundColor: '#1F242B',
-                            padding: 6,
-                            borderRadius: 20
-                        }} >
-                            <AntDesign name='close' size={18} color='#fff' />
-                        </TouchableOpacity>
-                        <Text style={{ color: '#fff', fontSize: 20 }}>ખેડૂત ઉપલબ્ધ નથી.. </Text>
-                    </View>}
+                                    />
+                                </View>
+                                <View style={[ReadFarmerStyles.input_group]}>
+                                    <FontAwesome5 name="map-marked-alt" size={24} color="#fff" style={{
+                                        paddingHorizontal: 8
+                                    }} />
+                                    <TextInput
+                                        style={ReadFarmerStyles.input}
+                                        placeholder="ગામ  "
+                                        value={selectedFarmer.data.Village}
+                                        placeholderTextColor="#BDBFC2"
+                                    />
+                                </View>
+                                <View style={[ReadFarmerStyles.input_group]}>
+                                    <Entypo name="old-phone" size={28} color="#fff" style={{
+                                        paddingHorizontal: 8
+                                    }} />
+                                    <TextInput
+                                        style={ReadFarmerStyles.input}
+                                        placeholder="0000000000"
+                                        value={selectedFarmer.data.MobileNo}
+                                        placeholderTextColor="#BDBFC2"
+                                    />
+                                </View>
+                                <View style={[ReadFarmerStyles.input_group]}>
+                                    <FontAwesome name="rupee" size={28} color="#fff" style={{
+                                        paddingHorizontal: 15
+                                    }} />
+                                    <TextInput
+                                        style={ReadFarmerStyles.input}
+                                        placeholder="0000000000"
+                                        value={selectedFarmer.data.Balance && selectedFarmer.data.Balance.toString()}
+                                        placeholderTextColor="#BDBFC2"
+                                    />
+                                </View>
+                            </View>
+                        </View> :
+                            <View style={ReadFarmerStyles.container}>
+                                <TouchableOpacity onPress={() => setVisible(false)} style={{
+                                    position: 'absolute',
+                                    top: 10,
+                                    right: 10,
+                                    backgroundColor: '#1F242B',
+                                    padding: 6,
+                                    borderRadius: 20
+                                }} >
+                                    <AntDesign name='close' size={18} color='#fff' />
+                                </TouchableOpacity>
+                                <ActivityIndicator color={"#FFF"} size={'large'} />
+                            </View>}
             </Modal>
         );
 
@@ -190,7 +200,7 @@ export const YearlyFolder = (props) => {
                 setVisible(false)
                 console.error('Error retrieving user data:', error);
             })
-            return () => unsubscribe();
+
         }, []);
         const validateInputs = () => {
             let valid = true;
@@ -213,7 +223,6 @@ export const YearlyFolder = (props) => {
                 return;
             }
             setLoading(true); // Set loading state to true
-            const FarmerDocumentPath = `Traders/${id}/Farmer`;
             const newInfo = {
                 Image: 'https://w7.pngwing.com/pngs/534/724/png-transparent-farmer-agriculture-selling-food-food-vertebrate-agriculture-thumbnail.png',
                 MobileNo: mobileNumber,
@@ -221,6 +230,7 @@ export const YearlyFolder = (props) => {
                 Village: village,
                 Balance: balance
             }
+            const FarmerDocumentPath = `Traders/${id}/Farmer`;
             const farmerRef = doc(db, FarmerDocumentPath, farmerId);
             updateDoc(farmerRef, newInfo)
                 .then(() => {
@@ -238,106 +248,109 @@ export const YearlyFolder = (props) => {
         };
         return (
             <Modal animationType="slide" visible={isVisible} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                {selectedFarmer != undefined ? <View style={ReadFarmerStyles.container}>
-                    <TouchableOpacity onPress={() => setVisible(false)} style={{
-                        position: 'absolute',
-                        top: 10,
-                        right: 10,
-                        backgroundColor: '#1F242B',
-                        padding: 6,
-                        borderRadius: 20
-                    }} >
-                        <AntDesign name='close' size={18} color='#fff' />
-                    </TouchableOpacity>
+                {
+                    isLoading ?
+                        <View style={ReadFarmerStyles.container}><ActivityIndicator color={"#fff"} /></View> :
+                        selectedFarmer != undefined ? <View style={ReadFarmerStyles.container}>
+                            <TouchableOpacity onPress={() => setVisible(false)} style={{
+                                position: 'absolute',
+                                top: 10,
+                                right: 10,
+                                backgroundColor: '#1F242B',
+                                padding: 6,
+                                borderRadius: 20
+                            }} >
+                                <AntDesign name='close' size={18} color='#fff' />
+                            </TouchableOpacity>
 
-                    <Image source={{ uri: selectedFarmer.data.Image }} style={{
-                        marginTop: 50, marginBottom: 20, width: 120, height: 120, borderRadius: 120, borderWidth: 5, borderColor: '#fff'
-                    }} />
-                    <View style={UpdateFarmerStyles.inputContainer}>
-                        <View style={[UpdateFarmerStyles.input_group, !Vname && { borderColor: '#C3533A' }]}>
-                            <FontAwesome5 name="user-tie" size={28} color="#fff" style={{
-                                paddingHorizontal: 8
+                            <Image source={{ uri: selectedFarmer.data.Image }} style={{
+                                marginTop: 50, marginBottom: 20, width: 120, height: 120, borderRadius: 120, borderWidth: 5, borderColor: '#fff'
                             }} />
-                            <TextInput
-                                style={UpdateFarmerStyles.input}
-                                placeholder="ખેડૂતનામ "
-                                value={name}
-                                placeholderTextColor="#BDBFC2"
-                                onChange={(e) => {
-                                    e.persist();
-                                    setName(e.nativeEvent.text);
-                                }}
-                            />
-                            {!Vname && <MaterialIcons name='error' size={24} color={'#C3533A'} style={{ position: 'absolute', left: '90%' }} />}
-                        </View>
-                        <View style={[UpdateFarmerStyles.input_group, !Vvillage && { borderColor: '#C3533A' }]}>
-                            <FontAwesome5 name="map-marked-alt" size={24} color="#fff" style={{
-                                paddingHorizontal: 8
-                            }} />
-                            <TextInput
-                                style={UpdateFarmerStyles.input}
-                                placeholder="ગામ  "
-                                value={village}
-                                placeholderTextColor="#BDBFC2"
-                                onChange={(e) => {
-                                    e.persist();
-                                    setVillage(e.nativeEvent.text);
-                                }}
-                            />
-                            {!Vvillage && <MaterialIcons name='error' size={24} color={'#C3533A'} style={{ position: 'absolute', left: '90%' }} />}
-                        </View>
-                        <View style={[UpdateFarmerStyles.input_group, !VmobileNumber && { borderColor: '#C3533A' }]}>
-                            <Entypo name="old-phone" size={28} color="#fff" style={{
-                                paddingHorizontal: 8
-                            }} />
-                            <TextInput
-                                style={UpdateFarmerStyles.input}
-                                placeholder="0000000000"
-                                value={mobileNumber}
-                                keyboardType='number-pad'
-                                placeholderTextColor="#BDBFC2"
-                                onChange={(e) => {
-                                    e.persist();
-                                    setMobileNumber(e.nativeEvent.text);
-                                }}
-                            />
-                            {!VmobileNumber && <MaterialIcons name='error' size={24} color={'#C3533A'} style={{ position: 'absolute', left: '90%' }} />}
-                        </View>
-                        <View style={[UpdateFarmerStyles.input_group]}>
-                            <FontAwesome name="rupee" size={28} color="#fff" style={{
-                                paddingHorizontal: 15
-                            }} />
-                            <TextInput
-                                style={UpdateFarmerStyles.input}
-                                placeholder="0000000000"
-                                value={balance}
-                                placeholderTextColor="#BDBFC2"
-                            />
-                        </View>
-                    </View>
-                    <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end' }}>
-                        <TouchableOpacity onPress={handleFarmer} style={UpdateFarmerStyles.button} disabled={isLoading}>
-                            {isLoading ? (
-                                <ActivityIndicator color="#FFFFFF" />
-                            ) : (
-                                <Text style={UpdateFarmerStyles.buttonText}>માહિતી સુધારો</Text>
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                </View> :
-                    <View style={ReadFarmerStyles.container}>
-                        <TouchableOpacity onPress={() => setVisible(false)} style={{
-                            position: 'absolute',
-                            top: 10,
-                            right: 10,
-                            backgroundColor: '#1F242B',
-                            padding: 6,
-                            borderRadius: 20
-                        }} >
-                            <AntDesign name='close' size={18} color='#fff' />
-                        </TouchableOpacity>
-                        <Text style={{ color: '#fff', fontSize: 20 }}>ખેડૂત ઉપલબ્ધ નથી.. </Text>
-                    </View>}
+                            <View style={UpdateFarmerStyles.inputContainer}>
+                                <View style={[UpdateFarmerStyles.input_group, !Vname && { borderColor: '#C3533A' }]}>
+                                    <FontAwesome5 name="user-tie" size={28} color="#fff" style={{
+                                        paddingHorizontal: 8
+                                    }} />
+                                    <TextInput
+                                        style={UpdateFarmerStyles.input}
+                                        placeholder="ખેડૂતનામ "
+                                        value={name}
+                                        placeholderTextColor="#BDBFC2"
+                                        onChange={(e) => {
+                                            e.persist();
+                                            setName(e.nativeEvent.text);
+                                        }}
+                                    />
+                                    {!Vname && <MaterialIcons name='error' size={24} color={'#C3533A'} style={{ position: 'absolute', left: '90%' }} />}
+                                </View>
+                                <View style={[UpdateFarmerStyles.input_group, !Vvillage && { borderColor: '#C3533A' }]}>
+                                    <FontAwesome5 name="map-marked-alt" size={24} color="#fff" style={{
+                                        paddingHorizontal: 8
+                                    }} />
+                                    <TextInput
+                                        style={UpdateFarmerStyles.input}
+                                        placeholder="ગામ  "
+                                        value={village}
+                                        placeholderTextColor="#BDBFC2"
+                                        onChange={(e) => {
+                                            e.persist();
+                                            setVillage(e.nativeEvent.text);
+                                        }}
+                                    />
+                                    {!Vvillage && <MaterialIcons name='error' size={24} color={'#C3533A'} style={{ position: 'absolute', left: '90%' }} />}
+                                </View>
+                                <View style={[UpdateFarmerStyles.input_group, !VmobileNumber && { borderColor: '#C3533A' }]}>
+                                    <Entypo name="old-phone" size={28} color="#fff" style={{
+                                        paddingHorizontal: 8
+                                    }} />
+                                    <TextInput
+                                        style={UpdateFarmerStyles.input}
+                                        placeholder="0000000000"
+                                        value={mobileNumber}
+                                        keyboardType='number-pad'
+                                        placeholderTextColor="#BDBFC2"
+                                        onChange={(e) => {
+                                            e.persist();
+                                            setMobileNumber(e.nativeEvent.text);
+                                        }}
+                                    />
+                                    {!VmobileNumber && <MaterialIcons name='error' size={24} color={'#C3533A'} style={{ position: 'absolute', left: '90%' }} />}
+                                </View>
+                                <View style={[UpdateFarmerStyles.input_group]}>
+                                    <FontAwesome name="rupee" size={28} color="#fff" style={{
+                                        paddingHorizontal: 15
+                                    }} />
+                                    <TextInput
+                                        style={UpdateFarmerStyles.input}
+                                        placeholder="0000000000"
+                                        value={balance}
+                                        placeholderTextColor="#BDBFC2"
+                                    />
+                                </View>
+                            </View>
+                            <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end' }}>
+                                <TouchableOpacity onPress={handleFarmer} style={UpdateFarmerStyles.button} disabled={isLoading}>
+                                    {isLoading ? (
+                                        <ActivityIndicator color="#FFFFFF" />
+                                    ) : (
+                                        <Text style={UpdateFarmerStyles.buttonText}>માહિતી સુધારો</Text>
+                                    )}
+                                </TouchableOpacity>
+                            </View>
+                        </View> :
+                            <View style={ReadFarmerStyles.container}>
+                                <TouchableOpacity onPress={() => setVisible(false)} style={{
+                                    position: 'absolute',
+                                    top: 10,
+                                    right: 10,
+                                    backgroundColor: '#1F242B',
+                                    padding: 6,
+                                    borderRadius: 20
+                                }} >
+                                    <AntDesign name='close' size={18} color='#fff' />
+                                </TouchableOpacity>
+                                <ActivityIndicator color={"#FFF"} size={'large'} />
+                            </View>}
             </Modal>
         );
     };
@@ -390,26 +403,132 @@ export const YearlyFolder = (props) => {
             </Modal>
         );
     };
+    /*  Delete Farmer*/
+    const DeleteFolder = ({ isVisible, setVisible, path, folderId }) => {
+        const [isLoading, setLoading] = useState(false); // Added isLoading state
+        const naviation = useNavigation()
+        const deleteIt = async () => {
+            setLoading(true);
+            try {
+                const farmerRef = doc(db, path, folderId);
+                await deleteDoc(farmerRef);
+                setVisible(false);
+                Alert.alert('ફોલ્ડર હટાવાયું.. ')
+                setLoading(false);
+            } catch (error) {
+                console.log(error);
+                alert('Server is Busy...');
+                setLoading(false);
+            }
+            finally {
+                //  naviation.navigate('Dashboard')
+            }
+        };
+
+        return (
+            <Modal animationType="slide" visible={isVisible} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <View style={DeleteStyles.container}>
+                    <TouchableOpacity onPress={() => setVisible(false)} style={{
+                        position: 'absolute',
+                        top: 10,
+                        right: 10,
+                        backgroundColor: '#1F242B',
+                        padding: 6,
+                        borderRadius: 20
+                    }} >
+                        <AntDesign name='close' size={18} color='#fff' />
+                    </TouchableOpacity>
+                    <FontAwesome name='warning' size={80} color={'#E57158'} />
+                    <Text style={{ marginTop: 10, fontSize: 26, color: '#fff', fontWeight: 'bold' }}>Are you Sure..?</Text>
+                    <Text style={{ marginVertical: 10, fontSize: 15, color: '#fff', fontWeight: '400', opacity: .8, width: '70%', textAlign: 'center' }}>Do you really want to delete this farmer? This Process cannot be undone</Text>
+                    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginTop: 10 }}>
+                        <TouchableOpacity style={DeleteStyles.button} onPress={() => setVisible(false)}><Text style={DeleteStyles.buttonText}>Cancel</Text></TouchableOpacity>
+                        <TouchableOpacity style={[DeleteStyles.button, { backgroundColor: '#E57158', borderColor: '#E57158' }]} onPress={deleteIt}><Text style={DeleteStyles.buttonText}>{isLoading ? <ActivityIndicator color={'#fff'} /> : 'Delete It!'}</Text></TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+        );
+    };
     const Folder = ({ path }) => {
         const [folders, setFolder] = useState([]);
         const [loading, setLoading] = useState(false);
         const usersRef = collection(db, path);
+        // setSum(balanceSum)
+        const FarmerDocumentPath = `Traders/${id}/Farmer`;
+        const farmerDoc = doc(db, FarmerDocumentPath, farmerId);
+
+        const farmerRef = collection(db, `Traders/${id}/Farmer/`);
         useEffect(() => {
-            const unsubscribe = onSnapshot(usersRef, (querySnapshot) => {
-                if (!querySnapshot.empty) {
-                    const folderDocs = querySnapshot.docs.map((doc) => ({
-                        id: doc.id,
-                        data: doc.data(),
-                    }));
-                    setFolder(folderDocs);
-                    setLoading(false)
+            const fetchData = async () => {
+                try {
+                    const folderQuerySnapshot = await getDocs(usersRef);
+                    if (!folderQuerySnapshot.empty) {
+                        const folderDocs = folderQuerySnapshot.docs.map((doc) => ({
+                            id: doc.id,
+                            data: doc.data(),
+                        }));
+                        setFolder(folderDocs);
+                        const balanceSum = folderDocs.reduce((sum, folder) => sum + parseInt(folder.data.Balance), 0); // Convert balanceSum to a number
+
+                        const farmerQuerySnapshot = await getDocs(farmerRef);
+                        if (!farmerQuerySnapshot.empty) {
+                            const FarmerDocs = farmerQuerySnapshot.docs.map((doc) => ({
+                                id: doc.id,
+                                data: doc.data(),
+                            }));
+                            const selectedData = FarmerDocs.find((item) => item.id === farmerId)?.data;
+                            if (selectedData) {
+
+                                const updatedData = { ...selectedData, Balance: balanceSum.toString() };
+                                try {
+                                    await updateDoc(farmerDoc, updatedData);
+                                } catch (error) {
+                                    console.error('Error updating farmer data:', error);
+                                }
+                            }
+                        }
+                    } else {
+                        const farmerQuerySnapshot = await getDocs(farmerRef);
+                        if (!farmerQuerySnapshot.empty) {
+                            const FarmerDocs = farmerQuerySnapshot.docs.map((doc) => ({
+                                id: doc.id,
+                                data: doc.data(),
+                            }));
+                            const selectedData = FarmerDocs.find((item) => item.id === farmerId)?.data;
+                            if (selectedData) {
+
+                                const updatedData = { ...selectedData, Balance: "0" };
+                                try {
+                                    await updateDoc(farmerDoc, updatedData);
+                                } catch (error) {
+                                    console.error('Error updating farmer data:', error);
+                                }
+                            }
+                        }
+                        setFolder([]);
+                    }
+
+                    setLoading(false);
+                } catch (error) {
+                    console.error('Error retrieving data:', error);
+                    setLoading(false);
                 }
+            };
+
+            const unsubscribe = onSnapshot(usersRef, () => {
+                fetchData();
             }, (error) => {
                 console.error('Error retrieving user data:', error);
-                setLoading(false)
-            })
-            return () => unsubscribe();
+                setLoading(false);
+            });
+
+            fetchData(); // Fetch initial data
+
+            return () => {
+                unsubscribe();
+            };
         }, []);
+
         if (loading) {
             return <ActivityIndicator color="#FFFFFF" />;
         }
@@ -428,10 +547,12 @@ export const YearlyFolder = (props) => {
                     </View> :
                     folders.map((folder, index) => (
                         <TouchableOpacity
-                            onLongPress={() => Modify(folder.id)}
+                            onLongPress={() => {
+                                setFolderId(folder.id);
+                                setDeleteFolderInfo(true)
+                            }}
                             key={index}
                             onPress={() => {
-                                dispatch(selectFolder({ id: folder.id }))
                                 props.navigation.navigate('Crops', { 'yearId': folder.id, 'year': folder.data.year, 'farmerId': farmerId }
                                 )
                             }
@@ -483,6 +604,7 @@ export const YearlyFolder = (props) => {
             <ViewFarmerInfo isVisible={ViewInfo} setVisible={setViewInfo} path={`Traders/${id}/Farmer/`} farmerId={farmerId} />
             <UpdateFarmerInfo isVisible={UpdateInfo} setVisible={setUpdateInfo} path={`Traders/${id}/Farmer/`} farmerId={farmerId} />
             <DeleteFarmer isVisible={DeleteInfo} setVisible={setDeleteInfo} farmerId={farmerId} />
+            <DeleteFolder isVisible={DeleteFolderInfo} setVisible={setDeleteFolderInfo} path={`Traders/${id}/Farmer/${farmerId}/Yearly/`} folderId={folderId} />
         </View>
     );
 };

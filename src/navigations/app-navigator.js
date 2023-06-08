@@ -19,7 +19,7 @@ import { setSignOut } from '../redux/slices/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { HandleNotification, HandleBillHeading, HandleCroplyFolder, selectNotification, selectBillHeading, selectCroplyFolder } from '../redux/slices/setting';
 import NewEntry from '../screens/Traders/NewEntry';
-import UpdateFarmerInfo from '../screens/Traders/Year/UpdateFarmer';
+
 
 const auth = getAuth(app);
 const Drawer = createDrawerNavigator();
@@ -200,7 +200,6 @@ const AppNavigator = () => {
             <Drawer.Screen name='Invoice' component={Invoice} />
             <Drawer.Screen name="Account" component={AccountScreen} />
             <Drawer.Screen name='NewEntry' component={NewEntry} options={{ headerShown: false }} />
-            <Drawer.Screen name='UpdateFarmer' component={UpdateFarmerInfo} options={{ headerShown: false }} />
         </Drawer.Navigator>
     );
 };
