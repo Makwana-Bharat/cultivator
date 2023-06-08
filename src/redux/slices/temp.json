@@ -1,0 +1,54 @@
+    {
+        "detail": {
+            "Balance": "-15000",
+            "Farmer": [
+                {
+                    "data": {
+                        "Balance": 0,
+                        "Image": "https://w7.pngwing.com/pngs/534/724/png-transparent-farmer-agriculture-selling-food-food-vertebrate-agriculture-thumbnail.png",
+                        "MobileNo": "1234567890",
+                        "Name": "Gefege",
+                        "Village": "Rhrgrbt"
+                    },
+                    "id": "JDWl0i1y0lSAqJM1ULwH",
+                },
+                {
+                    "data": {
+                        "Balance": 0,
+                        "Image": "https://w7.pngwing.com/pngs/534/724/png-transparent-farmer-agriculture-selling-food-food-vertebrate-agriculture-thumbnail.png",
+                        "MobileNo": "9859588936",
+                        "Name": "Hgdf",
+                        "Village": "ફરેન્ડશીપ જીસી"
+                    },
+                    "id": "MIO50xCRpFOwHnYLfyMn"
+                },
+                {
+                    "data": {
+                        "Balance": -100000,
+                        "Image": "https://w7.pngwing.com/pngs/534/724/png-transparent-farmer-agriculture-selling-food-food-vertebrate-agriculture-thumbnail.png",
+                        "MobileNo": "9409450471",
+                        "Name": "દેવજીભાઇ ધર્મશિભાઈ મકવાણા",
+                        "Village": "કુંભાર"
+                    },
+                    "id": "3WL1EEe0rshAj8nNdE7b""Folder": {}
+                },
+                {
+                    "data": {
+                        "Balance": 0,
+                        "Image": "https://w7.pngwing.com/pngs/534/724/png-transparent-farmer-agriculture-selling-food-food-vertebrate-agriculture-thumbnail.png",
+                        "MobileNo": "9450471691",
+                        "Name": "રામભાઇ મોહનભાઈ કુકડિયા",
+                        "Village": "Kumbhan"
+                    },
+                    "id": "gD9EFrOgbrg4Ov5I8DMI"
+                }
+            ],
+            "email": "2000bharat@gmail.com",
+            "name": "રાહુલભાઈ મકવાણા ",
+            "trade": "રામદેવ ટ્રેડીંગ ",
+            "tradeImg": "https://i.pinimg.com/originals/26/c5/38/26c53885124020c48bb892d72f94583f.jpg"
+        },
+        "id": "MPL6WjjIGY5qYOQhS7SN",
+        "isLoggedIn": true,
+        "type": "Traders"
+    },
