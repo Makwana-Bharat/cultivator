@@ -39,36 +39,6 @@ const NewEntry = ({ isVisible, setVisible, path }) => {
     const [date, setDate] = useState(new Date().toLocaleDateString('en-GB'));
     const [today, setToday] = useState(new Date());
     const [dateVisible, setDateVisible] = useState(false);
-
-    const UpdateBalance = (Balance) => {
-        let docRef = doc(db, pathArr[0], pathArr[1]);
-        updateDoc(docRef, {
-            Balance: user.Balance + Balance,
-        }).then(() => { });
-
-        docRef = doc(
-            db,
-            `${pathArr[0]}/${pathArr[1]}/${pathArr[2]}`,
-            pathArr[3]
-        );
-        updateDoc(docRef, {
-            Balance: useSelector(selectedFarmerBalance) + Balance,
-        }).then(() => {
-            dispatch(Update(Balance));
-        });
-
-        docRef = doc(
-            db,
-            `${pathArr[0]}/${pathArr[1]}/${pathArr[2]}/${pathArr[3]}/${pathArr[4]}`,
-            pathArr[5]
-        );
-        updateDoc(docRef, {
-            Balance: Balance,
-        }).then(() => {
-            dispatch(Update(Balance));
-        });
-    };
-
     const handleEntry = (type) => {
         if (amount === '' || detail === '') {
             Alert.alert('Error', 'Please Fill Details..');
@@ -83,20 +53,22 @@ const NewEntry = ({ isVisible, setVisible, path }) => {
 
         addDoc(collection(db, `${path}/${type}`), Entry)
             .then(() => {
-                Alert.alert('નવી એન્ટ્રી ઉમેરાઈ .. ');
-                UpdateBalance(type === 'ઉધાર' ? -amount : amount);
+                Alert.alert('Success', 'નવી એન્ટ્રી ઉમેરાઈ .. ');
             })
             .catch((error) => {
                 Alert.alert('Server is Busy...');
                 console.log(error);
             })
             .finally(() => {
+                setAmount('');
+                setDate(new Date().toLocaleDateString('en-GB'));
+                setToday(new Date());
+                setDetail('')
                 setLoading1(false);
                 setLoading2(false);
                 setVisible(false);
             });
     };
-
     const handleDate = (selectedDate) => {
         setToday(selectedDate);
         if (selectedDate) {
@@ -105,9 +77,6 @@ const NewEntry = ({ isVisible, setVisible, path }) => {
         }
         setDateVisible(false);
     };
-
-    const showSpinner = Platform.OS === 'ios';
-
     return (
         <Modal
             animationType="slide"

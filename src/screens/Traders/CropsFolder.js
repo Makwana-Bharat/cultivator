@@ -8,6 +8,7 @@ import app from '../../../config/firebase';
 import { useSelector } from 'react-redux';
 import { selectCroplyFolder } from '../../redux/slices/setting';
 import { DeleteStyles } from '../../StyleSheet/YearlyFolder';
+
 const auth = getAuth(app);
 const db = getFirestore();
 

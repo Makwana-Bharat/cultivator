@@ -264,7 +264,7 @@ export const YearlyFolder = (props) => {
                             </TouchableOpacity>
 
                             <Image source={{ uri: selectedFarmer.data.Image }} style={{
-                                marginTop: 50, marginBottom: 20, width: 120, height: 120, borderRadius: 120, borderWidth: 5, borderColor: '#fff'
+                                marginTop: 20, marginBottom: 20, width: 120, height: 120, borderRadius: 120, borderWidth: 5, borderColor: '#fff'
                             }} />
                             <View style={UpdateFarmerStyles.inputContainer}>
                                 <View style={[UpdateFarmerStyles.input_group, !Vname && { borderColor: '#C3533A' }]}>

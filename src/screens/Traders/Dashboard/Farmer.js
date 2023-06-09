@@ -33,13 +33,12 @@ export const Farmer = ({ farmers, loading }) => {
                                 style={farmerStyle.container}
                                 key={index}
                                 onPress={() => {
-                                    // dispatch(selectFarmer({
-                                    //     id: farmer.id,
-                                    //     name: farmer.data.Name,
-                                    //     village: farmer.data.Village,
-                                    //     Balance: farmer.data.Balance
-                                    // }))
-
+                                    dispatch(selectFarmer({
+                                        id: farmer.id,
+                                        name: farmer.data.Name,
+                                        village: farmer.data.Village,
+                                        Balance: farmer.data.Balance
+                                    }))
                                     navigation.navigate('Yearly', { farmerId: farmer.id })
                                 }}
                             >
