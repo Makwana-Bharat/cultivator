@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons, FontAwesome5, Entypo, MaterialIcons } from '@expo/vector-icons';
@@ -11,6 +11,7 @@ import firebase from 'firebase/compat/app'
 import { firebaseConfig } from '../../../config/firebase';
 import app from '../../../config/firebase';
 import VerifyOTP from './VerifyOTP';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const auth = getAuth(app);
 const db = getFirestore(app);
 
@@ -19,33 +20,48 @@ const LoginScreen = () => {
     const [password, setPassword] = useState('');
     const [mobileNumber, setMobileNumber] = useState('');
     const [userType, setUserType] = useState('Trader');
-    const [loading, setLoading] = useState(false); // New state variable for loading state
+    const [loading, setLoading] = useState(false);
     const [confirm, setConfirm] = useState('');
-    const [isVisible, setVisible] = useState(false)
+    const [isVisible, setVisible] = useState(false);
     const recaptchaVerifierRef = useRef(null);
-    //Validation
+
+    // Validation
     const [Vemail, setVEmail] = useState(true);
     const [Vpassword, setVPassword] = useState(true);
     const [VmobileNumber, setVMobileNumber] = useState(true);
 
-
     const navigation = useNavigation();
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        const checkUserLoggedIn = async () => {
+            try {
+                const user = await AsyncStorage.getItem('user');
+                if (user) {
+                    const userData = JSON.parse(user);
+                    dispatch(setSignIn(userData));
+                }
+            } catch (error) {
+                console.log('Error retrieving user data:', error);
+            }
+        };
+
+        checkUserLoggedIn();
+    }, []);
+
     const validateInputs = (Type) => {
         let valid = true;
         if (Type === 'Trader') {
-            if (email == '' || email.trim() === '') {
+            if (email === '' || email.trim() === '') {
                 setVEmail(false);
                 valid = false;
             }
-            if (password == '' || password.length < 6) {
+            if (password === '' || password.length < 6) {
                 setVPassword(false);
                 valid = false;
             }
-        }
-        else {
-            if (mobileNumber.length != 10) {
-                alert(mobileNumber.length)
+        } else {
+            if (mobileNumber.length !== 10) {
                 setVMobileNumber(false);
                 valid = false;
             }
@@ -53,56 +69,47 @@ const LoginScreen = () => {
         return valid;
     };
 
-    const handleLogin = () => {
-        // Handle login logic here
+    const handleLogin = async () => {
         if (!validateInputs(userType)) {
             return;
         }
-        setLoading(true); // Set loading state to true
+        setLoading(true);
+
         if (userType === 'Trader') {
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const emailid = userCredential.user.email;
 
-            signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    // Signed in 
-                    const emailid = userCredential.user.email;
+                const usersRef = collection(db, 'Traders');
+                const q = query(usersRef, where('email', '==', emailid));
 
-                    // Retrieve user data from Firestore
-                    const usersRef = collection(db, 'Traders');
-                    const q = query(usersRef, where('email', '==', emailid));
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    const userDoc = querySnapshot.docs[0];
+                    const userData = userDoc.data();
+                    const data = {
+                        isLoggedIn: true,
+                        id: userDoc.id,
+                        detail: userData,
+                        type: 'Traders',
+                    };
 
-                    getDocs(q)
-                        .then((querySnapshot) => {
-                            if (!querySnapshot.empty) {
-                                const userDoc = querySnapshot.docs[0];
-                                const userData = userDoc.data();
-                                const data = {
-                                    isLoggedIn: true,
-                                    id: userDoc.id,
-                                    detail: userData,
-                                    type: 'Traders'
-                                };
-
-                                dispatch(setSignIn(data));
-                                // console.log('work')
-                            }
-                        })
-                        .catch((error) => {
-                            Alert.alert('Something Wen`t Wrong...,', 'Please check Internet Connection..');
-                        })
-                        .finally(() => {
-                            setLoading(false); // Set loading state to false
-                        });
-                })
-                .catch((error) => {
-                    setEmail("");
-                    setPassword("");
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    Alert.alert("Login Failed");
-                    setLoading(false); // Set loading state to false
-                });
-        }
-        else {
+                    dispatch(setSignIn(data));
+                    await AsyncStorage.setItem('user', JSON.stringify(data));
+                } else {
+                    Alert.alert('User not found');
+                }
+            } catch (error) {
+                setEmail('');
+                setPassword('');
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                Alert.alert('Login Failed');
+                console.log(error)
+            } finally {
+                setLoading(false);
+            }
+        } else {
             alert('સર્વિસ ઉપલબ્ધ નથી.. ')
             // setLoading(false)
             // setVisible(true)
@@ -115,7 +122,7 @@ const LoginScreen = () => {
     };
 
     const navigateToScreen = (screen) => {
-        navigation.navigate(screen); // Replace 'Register' with the appropriate screen name for your register screen
+        navigation.navigate(screen);
     };
 
     return (

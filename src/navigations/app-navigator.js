@@ -19,7 +19,7 @@ import { setSignOut } from '../redux/slices/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { HandleNotification, HandleBillHeading, HandleCroplyFolder, selectNotification, selectBillHeading, selectCroplyFolder } from '../redux/slices/setting';
 import NewEntry from '../screens/Traders/NewEntry';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const auth = getAuth(app);
 const Drawer = createDrawerNavigator();
@@ -60,14 +60,18 @@ const CustomDrawerContent = (props) => {
     const BillHeading = useSelector(selectBillHeading);
     const CroplyFolder = useSelector(selectCroplyFolder);
     const user = useSelector(state => state.userAuth.detail);
-    const handleLogout = () => {
-        signOut(auth)
-            .then(() => {
-                alert('LogOut successfully');
-                dispatch(setSignOut());
-            })
-            .catch((error) => {
-            });
+    const handleLogout = async () => {
+        try {
+            await AsyncStorage.removeItem('user'); // Await the AsyncStorage.removeItem call
+            await signOut(auth);
+            alert('LogOut successfully');
+            dispatch(setSignOut());
+        } catch (error) {
+            // Handle any errors that occur during the logout process
+            console.log('Logout error:', error);
+            // Optionally display an error message to the user
+            alert('An error occurred during logout. Please try again.');
+        }
     };
 
     return (
@@ -118,13 +122,13 @@ const CustomDrawerContent = (props) => {
 
             {/* Notification Toggle */}
             <View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16 }}>
+                {/* <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16 }}>
                     <Switch
                         value={Notification}
                         onValueChange={() => dispatch(HandleNotification(!Notification))}
                     />
                     <Text style={{ color: '#fff', marginLeft: 10, fontSize: 16, fontWeight: '400' }}>Notifications</Text>
-                </View>
+                </View> */}
 
                 {/* Other Toggles */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16 }}>

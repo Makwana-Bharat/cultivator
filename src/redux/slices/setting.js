@@ -4,7 +4,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
     Notification: false,
     BillHeading: true,
-    CroplyFolder: true,
+    CroplyFolder: false,
 };
 
 const setting = createSlice({
