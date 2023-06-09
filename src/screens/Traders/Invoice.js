@@ -10,6 +10,7 @@ import { getFirestore, collection, getDocs, onSnapshot, doc, updateDoc } from 'f
 import { BillStyles } from '../../StyleSheet/BillCSS';
 import app from '../../../config/firebase';
 import { getAuth } from 'firebase/auth';
+import { pdfGenerator } from './pdfGenerator';
 const auth = getAuth(app);
 const db = getFirestore();
 export const Invoice = (props) => {
@@ -24,6 +25,7 @@ export const Invoice = (props) => {
     const cropRef = collection(db, CropDocumentPath);
     const CropDoc = doc(db, CropDocumentPath, CropId);
     const [isVisible, setVisible] = useState(false)
+    const [data, setData] = useState();
 
     const Header = useSelector(selectBillHeading);
     const farmerName = useSelector(selectedFarmerName);
@@ -57,7 +59,6 @@ export const Invoice = (props) => {
                         );
                         setUdharSum(udharSum);
                         money -= udharSum;
-                        console.log(udharEntries)
                     }
                     else {
                         setUdhar([]);
@@ -78,7 +79,6 @@ export const Invoice = (props) => {
                         );
                         setJamaSum(jamaSum)
                         money += jamaSum;
-                        console.log(money)
                     }
                     else {
                         setJama([]);
@@ -216,6 +216,7 @@ export const Invoice = (props) => {
                 <View style={{ display: 'flex', flexDirection: 'row', width: '33%', justifyContent: 'space-around' }}>
 
                     <TouchableOpacity style={[styles.fab, { backgroundColor: '#793B97' }]}
+                        onPress={() => pdfGenerator({ Header, farmerName, farmerVillage, today, props })}
                     >
                         <MaterialIcons name='print' size={24}
                             color='white' />

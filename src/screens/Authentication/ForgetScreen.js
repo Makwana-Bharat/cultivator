@@ -14,15 +14,17 @@ const ForgetScreen = () => {
 
     const handleForget = () => {
         // Handle Forget logic here
-        sendPasswordResetEmail(auth, "2018bharatmakwana@gmail.com")
+        sendPasswordResetEmail(auth, email)
             .then(() => {
-                console.log('Password reset email sent');
+                alert('Password reset email sent');
                 // Navigate to a success/reset password confirmation screen if needed
             })
             .catch((error) => {
-                console.error('Error sending password reset email:', error);
+                // if (error == " [FirebaseError: Firebase: Error (auth/user-not-found).] ")
+                alert('Please Register First...');
+                // console.log(error)
                 // Handle the error, show an error message, etc.
-            });
+            }).finally(() => navigateToScreen('Login'));
     };
 
     const navigateToScreen = (screen) => {

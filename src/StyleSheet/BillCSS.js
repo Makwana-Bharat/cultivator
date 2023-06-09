@@ -28,15 +28,17 @@ export const BillStyles = StyleSheet.create({
         color: '#fff',
         fontSize: 8,
         fontWeight: '700',
-        width: '30%'
+        width: '25%',
+        textAlign: 'left'
     },
     header3: {
 
         color: '#fff',
         fontSize: 8,
         fontWeight: '700',
-        width: '40%',
-        textAlign: 'center'
+        width: '50%',
+        textAlign: 'right',
+        paddingRight: 15,
     },
     dataContainer: {
         display: 'flex',
@@ -47,22 +49,22 @@ export const BillStyles = StyleSheet.create({
     data1: {
         color: '#fff',
         fontSize: 6,
-        width: '15%',
+        width: '30%',
     },
     data2: {
         color: '#fff',
         fontSize: 6,
         width: '25%',
-        textAlign: 'center'
+        textAlign: 'left'
     },
     data3: {
         color: '#fff',
         fontSize: 7,
         width: '50%',
         height: 10,
-        textAlign: 'left',
         overflow: 'hidden',
-        paddingLeft: 10,
+        textAlign: 'right',
+        paddingRight: 15,
     },
 
 });
