@@ -42,7 +42,7 @@ const LoginScreen = () => {
                     dispatch(setSignIn(userData));
                 }
             } catch (error) {
-                console.log('Error retrieving user data:', error);
+                alert('Error retrieving user data:');
             }
         };
 
