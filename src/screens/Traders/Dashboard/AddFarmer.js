@@ -60,11 +60,10 @@ const AddFarmer = ({ isVisible, setVisible }) => {
                 setName('')
                 setVillage('')
                 alert('ખેડૂત ઉમેરાયો.. ');
-                // dispatch(newFarmer(data));
                 navigation.navigate('Dashboard')
             })
             .catch((error) => {
-                console.log(error)
+                // console.log(error)
                 alert("Server is Busy...");
             })
             .finally(() => {

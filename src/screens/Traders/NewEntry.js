@@ -57,7 +57,7 @@ const NewEntry = ({ isVisible, setVisible, path }) => {
             })
             .catch((error) => {
                 Alert.alert('Server is Busy...');
-                console.log(error);
+                // console.log(error);
             })
             .finally(() => {
                 setAmount('');

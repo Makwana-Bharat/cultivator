@@ -205,12 +205,12 @@ const CropsFolder = (props) => {
                 Alert.alert('ફોલ્ડર હટાવાયું.. ')
                 setLoading(false);
             } catch (error) {
-                console.log(error);
+                // console.log(error);
                 alert('Server is Busy...');
                 setLoading(false);
             }
             finally {
-                //  naviation.navigate('Dashboard')
+
             }
         };
 

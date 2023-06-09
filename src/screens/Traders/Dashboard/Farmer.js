@@ -24,7 +24,6 @@ export const Farmer = ({ farmers, loading }) => {
                         <Text style={{ color: '#E57158', fontWeight: 'bold', letterSpacing: 1 }}>કોય ખેડૂત નથી.. </Text>
                     </View> :
                     farmers.map((farmer, index) => {
-                        {/* console.log(farmer.id) */ }
                         if (farmer == undefined) {
                             return <></>;
                         }

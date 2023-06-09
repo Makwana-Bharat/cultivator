@@ -237,7 +237,7 @@ export const YearlyFolder = (props) => {
                     alert('ખેડૂતની માહિતી સુધારાઈ..');
                 })
                 .catch((error) => {
-                    console.log(error);
+                    // console.log(error);
                     alert('Server is Busy...');
                 })
                 .finally(() => {
@@ -370,7 +370,7 @@ export const YearlyFolder = (props) => {
                 Alert.alert('ખેડૂત હટવાયો.. ')
                 setLoading(false);
             } catch (error) {
-                console.log(error);
+                // console.log(error);
                 alert('Server is Busy...');
                 setLoading(false);
             }
@@ -415,12 +415,11 @@ export const YearlyFolder = (props) => {
                 Alert.alert('ફોલ્ડર હટાવાયું.. ')
                 setLoading(false);
             } catch (error) {
-                console.log(error);
+                // console.log(error);
                 alert('Server is Busy...');
                 setLoading(false);
             }
             finally {
-                //  naviation.navigate('Dashboard')
             }
         };
 

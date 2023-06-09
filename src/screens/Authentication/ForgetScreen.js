@@ -17,13 +17,9 @@ const ForgetScreen = () => {
         sendPasswordResetEmail(auth, email)
             .then(() => {
                 alert('Password reset email sent');
-                // Navigate to a success/reset password confirmation screen if needed
             })
             .catch((error) => {
-                // if (error == " [FirebaseError: Firebase: Error (auth/user-not-found).] ")
-                alert('Please Register First...');
-                // console.log(error)
-                // Handle the error, show an error message, etc.
+                alert('ખાતું ઉપલબ્ધ નથી.. ');
             }).finally(() => navigateToScreen('Login'));
     };
 

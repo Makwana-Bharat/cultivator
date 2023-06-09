@@ -63,7 +63,7 @@ export const Invoice = (props) => {
                     else {
                         setUdhar([]);
                         setUdharSum("0000")
-                        console.log("udhar nothing")
+                        // console.log("udhar nothing")
                     }
                     //JAMA
                     const jamaQuerySnapshot = await getDocs(jama);
@@ -83,7 +83,7 @@ export const Invoice = (props) => {
                     else {
                         setJama([]);
                         setJamaSum("0000");
-                        console.log("jama nothing")
+                        // console.log("jama nothing")
                     }
                     //UPDATE 
                     const cropQuerySnapshot = await getDocs(cropRef);
@@ -104,17 +104,16 @@ export const Invoice = (props) => {
                             try {
                                 await updateDoc(CropDoc, updatedData);
                             } catch (error) {
-                                console.error("Error updating farmer data:", error);
+                                // console.error("Error updating farmer data:", error);
                             }
                         }
                     }
 
 
                 } catch (error) {
-                    console.log(error)
+                    alert("કૃપયા કરી નેટવર્ક ચેક ફરી પ્રયત્ન કરો..,");
                 } finally {
 
-                    console.log(props.route.params)
                 }
 
             }

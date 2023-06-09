@@ -48,8 +48,8 @@ const RegisterScreen = () => {
         return valid;
     };
     const handleRegister = () => {
-        // Alert.alert("સર્વિસ ઉપલબ્ધ નથી.. સંપર્ક +91 9409450471  ");
-        // return;
+        Alert.alert("સર્વિસ ઉપલબ્ધ નથી.. સંપર્ક +91 9409450471  ");
+        return;
         /*
 
         Tempory Comment Until Payment Module

@@ -241,12 +241,11 @@ export const pdfGenerator = async ({ Header, farmerName, farmerVillage, today, p
     });
 
     await Sharing.shareAsync(destinationPath).then(() => {
-
+        alert('PDF saved and shared:');
     }).catch((error) => {
 
     }).finally(() => {
 
     });
 
-    console.log('PDF saved and shared:', destinationPath);
 };
