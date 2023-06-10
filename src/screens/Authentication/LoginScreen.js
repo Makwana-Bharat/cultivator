@@ -5,7 +5,7 @@ import { MaterialCommunityIcons, FontAwesome5, Entypo, MaterialIcons } from '@ex
 import { useDispatch } from 'react-redux'
 import { setSignIn } from '../../redux/slices/authSlice';
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signInWithPhoneNumber, User } from 'firebase/auth';
-import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
+// import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 import { getFirestore, collection, query, where, getDocs, collectionGroup } from 'firebase/firestore';
 import firebase from 'firebase/compat/app'
 import { firebaseConfig } from '../../../config/firebase';
@@ -127,12 +127,12 @@ const LoginScreen = () => {
 
     return (
         <View style={styles.container}>
-            <FirebaseRecaptchaVerifierModal
+            {/* <FirebaseRecaptchaVerifierModal
                 ref={recaptchaVerifierRef}
                 firebaseConfig={firebaseConfig}
-            />
+            /> */}
             <Image source={require('../../../assets/logo.png')} style={styles.logo} />
-            <Image source={require('../../../assets/title.png')} style={styles.title} />
+            <Text style={{ fontFamily: 'piedra-font', color: '#fff', fontSize: 50, letterSpacing: 1, marginBottom: 20 }}>LOGIN</Text>
             <View style={styles.typeSelection}>
                 <TouchableOpacity
                     style={[styles.radioButton, userType === 'Trader' && styles.radioButtonSelected]}

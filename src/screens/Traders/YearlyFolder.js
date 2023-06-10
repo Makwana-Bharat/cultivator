@@ -4,20 +4,16 @@ import { MaterialCommunityIcons, FontAwesome, FontAwesome5, MaterialIcons, AntDe
 import { Modal } from 'react-native-paper';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, deleteDoc, getDocs, setDoc, doc, onSnapshot, updateDoc } from 'firebase/firestore';
-// import { selectFarmer, selectFolder } from '../../redux/slices/farmerSlice';
 import app from '../../../config/firebase';
 import { useSelector, useDispatch } from 'react-redux';
-import DateSpinner from './YearSpinner';
 import { useNavigation } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { styles, DeleteStyles, ReadFarmerStyles, UpdateFarmerStyles } from '../../StyleSheet/YearlyFolder';
-// import ViewFarmerInfo from './Year/ViewFarmerInfo';
-// import DeleteFarmer from './Year/DeleteFarmer';
 const auth = getAuth(app);
 const db = getFirestore();
 
 export const YearlyFolder = (props) => {
-    const farmerId = props.route.params.farmerId;
+    const [farmerId, setFarmerId] = useState(props.route.params.farmerId);
     const [showCalendar, setShowCalendar] = useState(false);
     const id = useSelector(state => state.userAuth.id);
     const YearDocumentPath = `Traders/${id}/Farmer/${farmerId}/Yearly/`;
@@ -88,7 +84,7 @@ export const YearlyFolder = (props) => {
                 {
                     isLoading ?
                         <View style={ReadFarmerStyles.container}><ActivityIndicator color={"#fff"} /></View> :
-                        selectedFarmer != undefined ? <View style={ReadFarmerStyles.container}>
+                        selectedFarmer != undefined && selectedFarmer.data != undefined ? <View style={ReadFarmerStyles.container}>
                             <TouchableOpacity onPress={() => setVisible(false)} style={{
                                 position: 'absolute',
                                 top: 10,
@@ -189,15 +185,16 @@ export const YearlyFolder = (props) => {
                         data: doc.data(),
                     }));
                     const selectedData = FarmerDocs.find(item => item.id === farmerId);
-                    setName(selectedData.data.Name)
-                    setVillage(selectedData.data.Village)
-                    setBalance(selectedData.data.Balance)
-                    setMobileNumber(selectedData.data.MobileNo)
+                    setName(selectedData?.data?.Name)
+                    setVillage(selectedData?.data?.Village)
+                    setBalance(selectedData?.data?.Balance)
+                    setMobileNumber(selectedData?.data?.MobileNo)
                     setSelectedFarmer(selectedData)
 
                 }
             }, (error) => {
-                setVisible(false)
+                if (selectedFarmer == undefined)
+                    setVisible(false)
                 console.error('Error retrieving user data:', error);
             })
 
@@ -251,7 +248,7 @@ export const YearlyFolder = (props) => {
                 {
                     isLoading ?
                         <View style={ReadFarmerStyles.container}><ActivityIndicator color={"#fff"} /></View> :
-                        selectedFarmer != undefined ? <View style={ReadFarmerStyles.container}>
+                        selectedFarmer != undefined && selectedFarmer.data != undefined ? <View style={ReadFarmerStyles.container}>
                             <TouchableOpacity onPress={() => setVisible(false)} style={{
                                 position: 'absolute',
                                 top: 10,
@@ -465,7 +462,7 @@ export const YearlyFolder = (props) => {
                             data: doc.data(),
                         }));
                         setFolder(folderDocs);
-                        const balanceSum = folderDocs.reduce((sum, folder) => sum + parseInt(folder.data.Balance), 0); // Convert balanceSum to a number
+                        const balanceSum = folderDocs.reduce((sum, folder) => sum + parseInt(folder?.data?.Balance), 0); // Convert balanceSum to a number
 
                         const farmerQuerySnapshot = await getDocs(farmerRef);
                         if (!farmerQuerySnapshot.empty) {
@@ -536,28 +533,33 @@ export const YearlyFolder = (props) => {
                 overScrollMode="never"
                 contentContainerStyle={styles.scrollViewContent}
             >
-                {!folders.length ?
+                {folders == undefined || !folders.length ?
                     <View style={{ flex: 1, height: 400, justifyContent: 'center', alignItems: 'center' }}>
                         <MaterialCommunityIcons name='emoticon-dead-outline' size={50} color={'#E57158'} />
                         <Text style={{ color: '#E57158', fontWeight: 'bold', letterSpacing: 1, fontSize: 24, marginBottom: 10 }}>Oops.!! </Text>
                         <Text style={{ color: '#E57158', fontWeight: 'bold', letterSpacing: 1 }}>કોય ફોલ્ડર ઉપલપદ્ધ નથી.. </Text>
                     </View> :
-                    folders.map((folder, index) => (
-                        <TouchableOpacity
-                            onLongPress={() => {
-                                setFolderId(folder.id);
-                                setDeleteFolderInfo(true)
-                            }}
-                            key={index}
-                            onPress={() => {
-                                props.navigation.navigate('Crops', { 'yearId': folder.id, 'year': folder.data.year, 'farmerId': farmerId }
-                                )
-                            }
-                            } style={{ paddingRight: 8, display: 'flex', justifyContent: 'center', width: 80, alignItems: 'center' }}>
-                            <MaterialCommunityIcons name="folder" color={folder.data.Balance == 0 ? '#7DAFEA' : folder.data.Balance < 0 ? '#E57158' : '#79B046'} style={styles.icon} />
-                            <Text style={{ color: '#fff', fontWeight: 'bold', letterSpacing: 1 }}>{folder.data.year}</Text>
-                        </TouchableOpacity>
-                    ))
+                    folders.map((folder, index) => {
+                        if (folder.data == undefined)
+                            return <></>
+                        else
+                            return (
+                                <TouchableOpacity
+                                    onLongPress={() => {
+                                        setFolderId(folder.id);
+                                        setDeleteFolderInfo(true)
+                                    }}
+                                    key={index}
+                                    onPress={() => {
+                                        props.navigation.navigate('Crops', { 'yearId': folder.id, 'year': folder.data.year, 'farmerId': farmerId }
+                                        )
+                                    }
+                                    } style={{ paddingRight: 8, display: 'flex', justifyContent: 'center', width: 80, alignItems: 'center' }}>
+                                    <MaterialCommunityIcons name="folder" color={folder.data.Balance == 0 ? '#7DAFEA' : folder.data.Balance < 0 ? '#E57158' : '#79B046'} style={styles.icon} />
+                                    <Text style={{ color: '#fff', fontWeight: 'bold', letterSpacing: 1 }}>{folder.data.year}</Text>
+                                </TouchableOpacity>
+                            )
+                    })
                 }
             </ScrollView>
         );

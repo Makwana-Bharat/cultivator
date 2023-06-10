@@ -37,7 +37,7 @@ const ForgetScreen = () => {
                 <AntDesign name="arrowleft" size={24} color="white" />
             </TouchableOpacity>
             <Image source={require('../../../assets/logo.png')} style={styles.logo} />
-            <Image source={require('../../../assets/Forget_Password.png')} alt='Forgot Password' style={styles.title} />
+            <Text style={{ fontFamily: 'piedra-font', color: '#fff', fontSize: 40, letterSpacing: 1, marginBottom: 20 }}>Forgot Password</Text>
             <View style={styles.inputContainer}>
                 <View style={styles.input_group}>
                     <MaterialCommunityIcons name="email" size={28} color="#fff" style={{
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     button: {
-        width: '105%',
+        width: '100%',
         backgroundColor: '#1F242B',
         paddingHorizontal: 35,
         display: 'flex',

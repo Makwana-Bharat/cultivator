@@ -13,12 +13,14 @@ export default {
       "backgroundColor": "#31363C"
     },
     "assetBundlePatterns": [
+      "assets/fonts/*",
       "**/*"
     ],
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "package": "com.AJAX0CODDER.cultivator",
       "permissions": [
         "android.permission.READ_CALENDAR",
         "android.permission.WRITE_CALENDAR"
@@ -32,6 +34,9 @@ export default {
       "favicon": "./assets/icon.png"
     },
     "extra": {
+      "eas": {
+        "projectId": "bdb860d0-d2b1-4024-a3cb-039aee529b57"
+      },
       firebaseApiKey: process.env.FIREBASE_API_KEY,
       firebaseAuthDomain: process.env.FIREBASE_AUTH_DOMAIN,
       firebaseProjectId: process.env.FIREBASE_PROJECT_ID,

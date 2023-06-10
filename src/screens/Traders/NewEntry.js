@@ -105,10 +105,7 @@ const NewEntry = ({ isVisible, setVisible, path }) => {
                     source={require('../../../assets/logo.png')}
                     style={styles.logo}
                 />
-                <Image
-                    source={require('../../../assets/NewEntry.png')}
-                    style={styles.title}
-                />
+                <Text style={{ fontFamily: 'piedra-font', color: '#fff', fontSize: 40, letterSpacing: 1, marginBottom: 15 }}>New Entry</Text>
                 <View style={styles.input_group}>
                     <FontAwesome name="rupee" size={28} color="#fff" style={{ paddingHorizontal: 15 }} />
                     <TextInput

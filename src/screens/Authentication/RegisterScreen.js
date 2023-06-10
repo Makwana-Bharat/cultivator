@@ -102,8 +102,7 @@ const RegisterScreen = () => {
 
     return (
         <View style={styles.container}>
-            {/* <Image source={require('../../assets/logo.png')} style={styles.logo} /> */}
-            <Image source={require('../../../assets/REGISTRAION.png')} style={styles.title} />
+            <Text style={{ fontFamily: 'piedra-font', color: '#fff', fontSize: 40, letterSpacing: 1, marginBottom: 20 }}>REGISTRATION</Text>
             <Image
                 source={{ uri: 'https://raw.githubusercontent.com/AJAX-Codder/cultivator/master/assets/Default_avatar.png' }}
                 style={{
