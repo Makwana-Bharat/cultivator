@@ -4,48 +4,51 @@ import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
 import { addFarmerToDetail } from '../../redux/slices/authSlice';
 import { getFirestore, collection, getDocs, onSnapshot } from 'firebase/firestore';
-import app from '../../../config/firebase';
 import { getAuth } from 'firebase/auth';
 import { DashboardStyles } from '../../StyleSheet/DashboardCSS';
 import { Farmer } from './Dashboard/Farmer';
 import AddFarmer from './Dashboard/AddFarmer';
-const auth = getAuth(app);
+import { firebase } from '../../../config/firebase';
+const auth = getAuth(firebase);
 const db = getFirestore();
 export const DashboardScreen = () => {
     const [loading, setLoading] = useState(true);
     const id = useSelector(state => state.userAuth.id);
-    const dispatch = useDispatch();
-    const Trader = useSelector(state => state.userAuth.detail);
-    const T = useSelector(state => state.userAuth);
     const FarmerDocumentPath = `Traders/${id}/Farmer`;
     const usersRef = collection(db, FarmerDocumentPath);
     const [isVisible, setVisible] = useState(false);
     const [Farmers, setFarmers] = useState();
     const [sum, setSum] = useState(0);
     useEffect(() => {
-        const unsubscribe = onSnapshot(usersRef, (querySnapshot) => {
-            if (!querySnapshot.empty) {
-                const farmerDocs = querySnapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    data: doc.data(),
-                })).sort((a, b) => a.data.Name.localeCompare(b.data.Name));
+        let unsubscribe;
+        const fetchData = async () => {
+            unsubscribe = onSnapshot(usersRef, (querySnapshot) => {
+                if (!querySnapshot.empty) {
+                    const farmerDocs = querySnapshot.docs.map((doc) => ({
+                        id: doc.id,
+                        data: doc.data(),
+                    })).sort((a, b) => a.data.Name.localeCompare(b.data.Name));
 
-                const balanceSum = farmerDocs.reduce((sum, farmer) => eval(sum + '+' + farmer.data.Balance), 0);
-                setSum(balanceSum)
-                setFarmers(farmerDocs);
+                    const balanceSum = farmerDocs.reduce((sum, farmer) => eval(sum + '+' + farmer.data.Balance), 0);
+                    setSum(balanceSum)
+                    setFarmers(farmerDocs);
+                } else {
+                    setFarmers([]);
+                }
+                setLoading(false);
+            }, (error) => {
+                Alert.alert('Error retrieving user data:', error);
+            });
+        };
+
+        fetchData();
+
+        return () => {
+            if (unsubscribe) {
+                unsubscribe();
             }
-            else {
-                setFarmers();
-            }
-            setLoading(false);
-        }, (error) => {
-            Alert.alert('Error retrieving user data:', error);
-        });
-
-        return () => unsubscribe();
-    }, []);
-
-
+        };
+    }, [usersRef]);
     return (
         <View style={DashboardStyles.container}>
             <View style={DashboardStyles.header}>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import { Entypo, FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import NewEntry from './NewEntry';
 import { useSelector } from 'react-redux';
 import { selectBillHeading } from '../../redux/slices/setting';
@@ -8,10 +8,10 @@ import { selectedFarmerName, selectedFarmerVillage } from '../../redux/slices/fa
 import BillEntry from './BillEntry';
 import { getFirestore, collection, getDocs, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { BillStyles } from '../../StyleSheet/BillCSS';
-import app from '../../../config/firebase';
 import { getAuth } from 'firebase/auth';
 import { pdfGenerator } from './pdfGenerator';
-const auth = getAuth(app);
+import { firebase } from '../../../config/firebase';
+const auth = getAuth(firebase);
 const db = getFirestore();
 export const Invoice = (props) => {
     const farmerIndex = props.route.params.path.indexOf('Farmer') + 'Farmer'.length;
@@ -25,15 +25,11 @@ export const Invoice = (props) => {
     const cropRef = collection(db, CropDocumentPath);
     const CropDoc = doc(db, CropDocumentPath, CropId);
     const [isVisible, setVisible] = useState(false)
-    const [data, setData] = useState();
-
     const Header = useSelector(selectBillHeading);
     const farmerName = useSelector(selectedFarmerName);
     const farmerVillage = useSelector(selectedFarmerVillage);
     const today = new Date().toLocaleDateString('en-GB');
-    { /*BILL */ }
     const BillContainerEntry = () => {
-
         const [Udhar, setUdhar] = useState([]);
         const [Jama, setJama] = useState([]);
         const [UdharSum, setUdharSum] = useState("0000");
@@ -41,61 +37,58 @@ export const Invoice = (props) => {
         useEffect(() => {
             const udhar = collection(db, `${props.route.params.path}/ઉધાર/`);
             const jama = collection(db, `${props.route.params.path}/જમા/`);
+
             const fetchData = async () => {
                 try {
                     let money = 0;
-
-                    //UDHAR
                     const udharQuerySnapshot = await getDocs(udhar);
                     if (!udharQuerySnapshot.empty) {
                         const udharEntries = udharQuerySnapshot.docs.map((doc) => ({
                             id: doc.id,
                             data: doc.data(),
                         }));
-                        setUdhar(udharEntries)
+                        setUdhar(udharEntries);
+
                         const udharSum = udharEntries.reduce(
                             (sum, folder) => sum + parseInt(folder.data.Balance),
                             0
                         );
-                        setUdharSum(udharSum);
-                        money -= udharSum;
-                    }
-                    else {
+                        if (!isNaN(udharSum) && isFinite(udharSum)) {
+                            setUdharSum(udharSum);
+                            money -= udharSum;
+                        }
+                    } else {
                         setUdhar([]);
-                        setUdharSum("0000")
-                        // console.log("udhar nothing")
+                        setUdharSum("0000");
                     }
-                    //JAMA
+
                     const jamaQuerySnapshot = await getDocs(jama);
                     if (!jamaQuerySnapshot.empty) {
                         const jamaEntries = jamaQuerySnapshot.docs.map((doc) => ({
                             id: doc.id,
                             data: doc.data(),
                         }));
-                        setJama(jamaEntries)
+                        setJama(jamaEntries);
                         const jamaSum = jamaEntries.reduce(
                             (sum, folder) => sum + parseInt(folder.data.Balance),
                             0
                         );
-                        setJamaSum(jamaSum)
-                        money += jamaSum;
-                    }
-                    else {
+                        if (!isNaN(jamaSum) && isFinite(jamaSum)) {
+                            setJamaSum(jamaSum);
+                            money += jamaSum;
+                        }
+                    } else {
                         setJama([]);
                         setJamaSum("0000");
-                        // console.log("jama nothing")
                     }
-                    //UPDATE 
+
                     const cropQuerySnapshot = await getDocs(cropRef);
                     if (!cropQuerySnapshot.empty) {
                         const cropDocs = cropQuerySnapshot.docs.map((doc) => ({
                             id: doc.id,
                             data: doc.data(),
                         }));
-
-                        const selectedData = cropDocs.find(
-                            (item) => item.id === CropId
-                        )?.data;
+                        const selectedData = cropDocs.find((item) => item.id === CropId)?.data;
                         if (selectedData) {
                             const updatedData = {
                                 ...selectedData,
@@ -104,40 +97,32 @@ export const Invoice = (props) => {
                             try {
                                 await updateDoc(CropDoc, updatedData);
                             } catch (error) {
-                                // console.error("Error updating farmer data:", error);
+                                console.log(error);
                             }
                         }
                     }
-
-
                 } catch (error) {
                     alert("કૃપયા કરી નેટવર્ક ચેક ફરી પ્રયત્ન કરો..,");
-                } finally {
-
                 }
-
-            }
+            };
             const unsubscribeUdhar = onSnapshot(udhar, () => {
                 fetchData();
             }, (error) => {
                 console.error("Error retrieving udhar data:", error);
                 setLoading(false);
             });
-
             const unsubscribeJama = onSnapshot(jama, () => {
                 fetchData();
             }, (error) => {
                 console.error("Error retrieving jama data:", error);
                 setLoading(false);
             });
-
-            fetchData(); // Fetch initial data
-
+            fetchData();
             return () => {
                 unsubscribeUdhar();
                 unsubscribeJama();
             };
-        }, [])
+        }, []);
         return (
             <View style={{ display: 'flex', width: '100%' }}>
                 <View style={{ display: 'flex', width: '100%', flexDirection: 'row', justifyContent: 'space-between' }}>

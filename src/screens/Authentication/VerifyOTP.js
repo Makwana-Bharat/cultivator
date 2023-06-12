@@ -1,20 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { AntDesign, FontAwesome5, Entypo } from '@expo/vector-icons';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { AntDesign } from '@expo/vector-icons';
 import { Modal } from 'react-native-paper';
-import app from '../../../config/firebase';
-import { useSelector } from 'react-redux';
-const auth = getAuth(app);
-const db = getFirestore();
-
 const VerifyOTP = ({ isVisible, setVisible, code, setcode }) => {
-    const [isLoading, setLoading] = useState(false); // Added isLoading state
+    const [isLoading, setLoading] = useState(false);
     const [OTP, setOTP] = useState();
     const Verify = () => {
-        setLoading(true); // Set loading state to true
+        setLoading(true);
         code.confirm(OTP).then((result) => {
             Alert.alert("Success",
                 "Verification Done..."
@@ -82,24 +74,6 @@ const styles = StyleSheet.create({
         height: 150,
         marginBottom: 20,
     },
-    title: {
-        marginBottom: 20,
-    },
-    typeSelection: {
-        width: '80%',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 20,
-    },
-    radioButton: {
-        backgroundColor: '#53595F',
-        paddingHorizontal: 40,
-        paddingVertical: 15,
-        borderRadius: 5,
-    },
-    radioButtonSelected: {
-        backgroundColor: '#1F242B',
-    },
     inputContainer: {
         marginBottom: 20,
     },
@@ -121,9 +95,6 @@ const styles = StyleSheet.create({
         color: '#fff',
         borderRadius: 10,
         paddingHorizontal: 10,
-    },
-    createNew: {
-        marginBottom: 10,
     },
     button: {
         width: '100%',

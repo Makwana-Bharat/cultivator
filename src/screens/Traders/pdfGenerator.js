@@ -1,10 +1,10 @@
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
-import { getFirestore, collection, getDocs, onSnapshot, doc, updateDoc } from 'firebase/firestore';
-import app from '../../../config/firebase';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { firebase } from '../../../config/firebase';
 import { getAuth } from 'firebase/auth';
-const auth = getAuth(app);
+const auth = getAuth(firebase);
 const db = getFirestore();
 export const pdfGenerator = async ({ Header, farmerName, farmerVillage, today, props }) => {
     const udhar = collection(db, `${props.route.params.path}/ઉધાર/`);
@@ -24,9 +24,6 @@ export const pdfGenerator = async ({ Header, farmerName, farmerVillage, today, p
             0
         );
     }
-    else {
-
-    }
     const jamaQuerySnapshot = await getDocs(jama);
     if (!jamaQuerySnapshot.empty) {
         jamaEntries = jamaQuerySnapshot.docs.map((doc) => ({
@@ -37,10 +34,6 @@ export const pdfGenerator = async ({ Header, farmerName, farmerVillage, today, p
             (sum, folder) => sum + parseInt(folder.data.Balance),
             0
         );
-
-    }
-    else {
-
     }
     const udharEntriesHtml = udharEntries.map(entry => `
     <tr style="width:100%">
@@ -231,21 +224,16 @@ export const pdfGenerator = async ({ Header, farmerName, farmerVillage, today, p
 
     `;
     const { uri } = await Print.printToFileAsync({ html: htmlContent });
-
     const pdfFileName = 'test.pdf';
     const destinationPath = `${FileSystem.documentDirectory}${pdfFileName}`;
-
     await FileSystem.moveAsync({
         from: uri,
         to: destinationPath,
     });
-
     await Sharing.shareAsync(destinationPath).then(() => {
         alert('PDF saved and shared:');
     }).catch((error) => {
-
-    }).finally(() => {
-
-    });
+        console.log(error)
+    })
 
 };

@@ -2,18 +2,13 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons, FontAwesome5, AntDesign } from '@expo/vector-icons';
-import { getAuth, onAuthStateChanged, sendPasswordResetEmail } from 'firebase/auth';
-import app from '../../../config/firebase';
-const auth = getAuth(app);
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
+import { firebase } from '../../../config/firebase';
+const auth = getAuth(firebase);
 const ForgetScreen = () => {
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [mobileNumber, setMobileNumber] = useState('');
-    const [userType, setUserType] = useState('Trader');
     const navigation = useNavigation();
-
     const handleForget = () => {
-        // Handle Forget logic here
         sendPasswordResetEmail(auth, email)
             .then(() => {
                 alert('Password reset email sent');
@@ -22,11 +17,9 @@ const ForgetScreen = () => {
                 alert('ખાતું ઉપલબ્ધ નથી.. ');
             }).finally(() => navigateToScreen('Login'));
     };
-
     const navigateToScreen = (screen) => {
-        navigation.navigate(screen); // Replace 'Register' with the appropriate screen name for your register screen
+        navigation.navigate(screen);
     };
-
     return (
         <View style={styles.container}>
             <TouchableOpacity onPress={() => navigateToScreen('Login')} style={{
@@ -79,24 +72,6 @@ const styles = StyleSheet.create({
         height: 150,
         marginBottom: 20,
     },
-    title: {
-        marginBottom: 20,
-    },
-    typeSelection: {
-        width: '80%',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 20,
-    },
-    radioButton: {
-        backgroundColor: '#53595F',
-        paddingHorizontal: 40,
-        paddingVertical: 15,
-        borderRadius: 5,
-    },
-    radioButtonSelected: {
-        backgroundColor: '#1F242B',
-    },
     inputContainer: {
         marginBottom: 20,
     },
@@ -119,9 +94,6 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 10,
         borderBottomRightRadius: 10,
         paddingHorizontal: 10,
-    },
-    createNew: {
-        marginBottom: 10,
     },
     button: {
         width: '100%',

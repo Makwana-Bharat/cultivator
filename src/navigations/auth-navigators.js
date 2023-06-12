@@ -4,7 +4,6 @@ import LoginScreen from '../screens/Authentication/LoginScreen';
 import RegisterScreen from '../screens/Authentication/RegisterScreen';
 import ForgetScreen from '../screens/Authentication/ForgetScreen';
 const Stack = createStackNavigator();
-
 const AuthNavigator = () => {
     return (
         <Stack.Navigator

@@ -8,34 +8,25 @@ import {
     Image,
     Alert,
     ActivityIndicator,
-    Platform,
 } from 'react-native';
-import { AntDesign, FontAwesome5, FontAwesome, Entypo } from '@expo/vector-icons';
+import { AntDesign, FontAwesome5, FontAwesome } from '@expo/vector-icons';
 import { Modal } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import { getAuth } from 'firebase/auth';
-import app from '../../../config/firebase';
+import { firebase } from '../../../config/firebase';
 import {
-    doc,
     getFirestore,
     collection,
     addDoc,
-    updateDoc,
 } from 'firebase/firestore';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { selectedFarmerBalance, Update } from '../../redux/slices/farmerSlice';
-
-const auth = getAuth(app);
+const auth = getAuth(firebase);
 const db = getFirestore();
-
 const NewEntry = ({ isVisible, setVisible, path }) => {
-    const pathArr = path.split('/');
-    const dispatch = useDispatch();
     const [amount, setAmount] = useState('');
     const [detail, setDetail] = useState('');
     const [isLoading1, setLoading1] = useState(false);
     const [isLoading2, setLoading2] = useState(false);
-    const user = useSelector((state) => state.userAuth.detail);
     const [date, setDate] = useState(new Date().toLocaleDateString('en-GB'));
     const [today, setToday] = useState(new Date());
     const [dateVisible, setDateVisible] = useState(false);
@@ -44,20 +35,17 @@ const NewEntry = ({ isVisible, setVisible, path }) => {
             Alert.alert('Error', 'Please Fill Details..');
             return;
         }
-
         let Entry = {
             Balance: amount,
             Date: date,
             Detail: detail,
         };
-
         addDoc(collection(db, `${path}/${type}`), Entry)
             .then(() => {
                 Alert.alert('Success', 'નવી એન્ટ્રી ઉમેરાઈ .. ');
             })
             .catch((error) => {
                 Alert.alert('Server is Busy...');
-                // console.log(error);
             })
             .finally(() => {
                 setAmount('');
@@ -219,24 +207,6 @@ const styles = StyleSheet.create({
         height: 120,
         marginBottom: 20,
     },
-    title: {
-        marginBottom: 20,
-    },
-    typeSelection: {
-        width: '80%',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 20,
-    },
-    radioButton: {
-        backgroundColor: '#53595F',
-        paddingHorizontal: 40,
-        paddingVertical: 15,
-        borderRadius: 5,
-    },
-    radioButtonSelected: {
-        backgroundColor: '#1F242B',
-    },
     inputContainer: {
         marginBottom: 20,
     },
@@ -259,9 +229,6 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 10,
         borderBottomRightRadius: 10,
         paddingHorizontal: 10,
-    },
-    createNew: {
-        marginBottom: 10,
     },
     button: {
         width: '45%',

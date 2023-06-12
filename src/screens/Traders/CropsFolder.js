@@ -2,21 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIndicator, TextInput, Alert } from 'react-native';
 import { Modal } from 'react-native-paper';
 import { MaterialCommunityIcons, FontAwesome, FontAwesome5, AntDesign, MaterialIcons } from '@expo/vector-icons';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, onSnapshot, updateDoc, doc, deleteDoc } from 'firebase/firestore';
-import app from '../../../config/firebase';
+import { firebase } from '../../../config/firebase';
 import { useSelector } from 'react-redux';
 import { selectCroplyFolder } from '../../redux/slices/setting';
 import { DeleteStyles } from '../../StyleSheet/YearlyFolder';
 
-const auth = getAuth(app);
+const auth = getAuth(firebase);
 const db = getFirestore();
 
 const CropMenu = ({ showCropMenu, onConfirm, onCancel }) => {
     const [selectedCropIndex, setSelectedCropIndex] = useState(0);
     const [Folder, setFolder] = useState('કપાસ')
     const [VFolder, setVFolder] = useState(true)
-    const [isLoading, setLoading] = useState(false); // Added isLoading state
+    const [isLoading, setLoading] = useState(false);
     const CroplyFolder = useSelector(selectCroplyFolder);
     if (CroplyFolder) {
         const cropsDetail = [
@@ -105,7 +105,6 @@ const CropMenu = ({ showCropMenu, onConfirm, onCancel }) => {
                     <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', width: '100%', backgroundColor: 'rgba(0,0,0,.2)', overflow: 'hidden', borderBottomLeftRadius: 15, borderBottomRightRadius: 15 }}>
                         <TouchableOpacity onPress={onCancel} style={{ height: 60, display: 'flex', justifyContent: 'center', alignItems: 'center', borderRightColor: 'rgba(255,255,255,.1)', borderRightWidth: 1, width: '50%' }}><Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>Cancel</Text></TouchableOpacity>
                         <TouchableOpacity onPress={() => {
-                            // setSelectedItem(cropsDetail[selectedCropIndex])
                             onConfirm(cropsDetail[selectedCropIndex])
                         }} style={{ height: 60, display: 'flex', justifyContent: 'center', alignItems: 'center', borderLeftColor: 'rgba(0,0,0,.1)', borderLeftWidth: 1, width: '50%' }}><Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>Ok</Text></TouchableOpacity>
                     </View>
@@ -195,7 +194,7 @@ const CropsFolder = (props) => {
     const [DeleteFolderInfo, setDeleteFolderInfo] = useState(false);
     const [folderId, setFolderId] = useState();
     const DeleteFolder = ({ isVisible, setVisible, path, folderId }) => {
-        const [isLoading, setLoading] = useState(false); // Added isLoading state
+        const [isLoading, setLoading] = useState(false);
         const deleteIt = async () => {
             setLoading(true);
             try {
@@ -205,12 +204,8 @@ const CropsFolder = (props) => {
                 Alert.alert('ફોલ્ડર હટાવાયું.. ')
                 setLoading(false);
             } catch (error) {
-                // console.log(error);
                 alert('Server is Busy...');
                 setLoading(false);
-            }
-            finally {
-
             }
         };
 
@@ -322,7 +317,7 @@ const CropsFolder = (props) => {
                 setLoading(false);
             });
 
-            fetchData(); // Fetch initial data
+            fetchData();
 
             return () => {
                 unsubscribe();
@@ -336,7 +331,7 @@ const CropsFolder = (props) => {
                 endFillColor="#31363C"
                 showsVerticalScrollIndicator={false}
                 overScrollMode="never"
-                contentContainerStyle={styles.scrollViewContent} // Added container style for flex wrapping
+                contentContainerStyle={styles.scrollViewContent}
             >
                 {!folders.length ?
                     <View style={{ flex: 1, height: 400, justifyContent: 'center', alignItems: 'center' }}>
@@ -424,7 +419,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         paddingLeft: 5
-        // justifyContent: 'center',
     },
     cropItem: {
         width: 70,

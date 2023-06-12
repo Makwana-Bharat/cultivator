@@ -1,42 +1,33 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIndicator, TextInput, Alert } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, TextInput, Alert } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome, FontAwesome5, MaterialIcons, AntDesign, Entypo } from '@expo/vector-icons';
 import { Modal } from 'react-native-paper';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, deleteDoc, getDocs, setDoc, doc, onSnapshot, updateDoc } from 'firebase/firestore';
-import app from '../../../config/firebase';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { styles, DeleteStyles, ReadFarmerStyles, UpdateFarmerStyles } from '../../StyleSheet/YearlyFolder';
-const auth = getAuth(app);
+import { firebase } from '../../../config/firebase';
+const auth = getAuth(firebase);
 const db = getFirestore();
-
 export const YearlyFolder = (props) => {
     const [farmerId, setFarmerId] = useState(props.route.params.farmerId);
     const [showCalendar, setShowCalendar] = useState(false);
     const id = useSelector(state => state.userAuth.id);
     const YearDocumentPath = `Traders/${id}/Farmer/${farmerId}/Yearly/`;
-    const FolderRef = collection(db, YearDocumentPath);
     const [ViewInfo, setViewInfo] = useState(false);
     const [UpdateInfo, setUpdateInfo] = useState(false);
     const [DeleteInfo, setDeleteInfo] = useState(false);
     const [DeleteFolderInfo, setDeleteFolderInfo] = useState(false);
     const [folderId, setFolderId] = useState();
-    const [sum, setSum] = useState(0);
     const navigation = useNavigation();
-    const dispatch = useDispatch();
     const openCalendar = () => {
         setShowCalendar(true);
     };
-
     const closeCalendar = () => {
         setShowCalendar(false);
     };
-
-    const Modify = (folderId) => {
-        alert(folderId)
-    }
     const handleYearSelection = (year) => {
         closeCalendar();
         const YearlyFolderDetails = {
@@ -44,7 +35,7 @@ export const YearlyFolder = (props) => {
             Balance: 0
         };
         const collectionRef = collection(db, YearDocumentPath);
-        const documentId = year.getFullYear().toString(); // Convert year to string for document ID
+        const documentId = year.getFullYear().toString();
         const data = YearlyFolderDetails;
         setDoc(doc(collectionRef, documentId), data)
             .then(() => {
@@ -54,7 +45,6 @@ export const YearlyFolder = (props) => {
                 Alert.alert('Server is Busy...');
             })
     };
-
     /* Reade Farmer */
     const ViewFarmerInfo = ({ isVisible, setVisible, path, farmerId }) => {
         const usersRef = collection(db, path);
@@ -75,10 +65,9 @@ export const YearlyFolder = (props) => {
                     setLoading(false)
             }, (error) => {
                 console.error('Error retrieving user data:', error);
-                // setLoading(false)
             })
             return () => unsubscribe();
-        }, []);
+        }, [farmerId, usersRef]);
         return (
             <Modal animationType="slide" visible={isVisible} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 {
@@ -190,7 +179,6 @@ export const YearlyFolder = (props) => {
                     setBalance(selectedData?.data?.Balance)
                     setMobileNumber(selectedData?.data?.MobileNo)
                     setSelectedFarmer(selectedData)
-
                 }
             }, (error) => {
                 if (selectedFarmer == undefined)
@@ -198,7 +186,7 @@ export const YearlyFolder = (props) => {
                 console.error('Error retrieving user data:', error);
             })
 
-        }, []);
+        }, [farmerId, selectedFarmer, setVisible, usersRef]);
         const validateInputs = () => {
             let valid = true;
             if (name == '') {
@@ -216,10 +204,9 @@ export const YearlyFolder = (props) => {
             return valid;
         };
         const handleFarmer = () => {
-            if (!validateInputs()) {
+            if (!validateInputs())
                 return;
-            }
-            setLoading(true); // Set loading state to true
+            setLoading(true);
             const newInfo = {
                 Image: 'https://w7.pngwing.com/pngs/534/724/png-transparent-farmer-agriculture-selling-food-food-vertebrate-agriculture-thumbnail.png',
                 MobileNo: mobileNumber,
@@ -234,12 +221,11 @@ export const YearlyFolder = (props) => {
                     alert('ખેડૂતની માહિતી સુધારાઈ..');
                 })
                 .catch((error) => {
-                    // console.log(error);
                     alert('Server is Busy...');
                 })
                 .finally(() => {
                     setVisible(false)
-                    setLoading(false); // Set loading state to false
+                    setLoading(false);
                     navigation.navigate('Dashboard')
                 });
         };
@@ -355,7 +341,7 @@ export const YearlyFolder = (props) => {
     /*  Delete Farmer*/
     const DeleteFarmer = ({ isVisible, setVisible, farmerId }) => {
         const id = useSelector((state) => state.userAuth.id);
-        const [isLoading, setLoading] = useState(false); // Added isLoading state
+        const [isLoading, setLoading] = useState(false);
         const naviation = useNavigation()
         const deleteIt = async () => {
             setLoading(true);
@@ -367,7 +353,6 @@ export const YearlyFolder = (props) => {
                 Alert.alert('ખેડૂત હટવાયો.. ')
                 setLoading(false);
             } catch (error) {
-                // console.log(error);
                 alert('Server is Busy...');
                 setLoading(false);
             }
@@ -375,7 +360,6 @@ export const YearlyFolder = (props) => {
                 naviation.navigate('Dashboard')
             }
         };
-
         return (
             <Modal animationType="slide" visible={isVisible} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 <View style={DeleteStyles.container}>
@@ -402,7 +386,7 @@ export const YearlyFolder = (props) => {
     };
     /*  Delete Farmer*/
     const DeleteFolder = ({ isVisible, setVisible, path, folderId }) => {
-        const [isLoading, setLoading] = useState(false); // Added isLoading state
+        const [isLoading, setLoading] = useState(false);
         const deleteIt = async () => {
             setLoading(true);
             try {
@@ -412,11 +396,8 @@ export const YearlyFolder = (props) => {
                 Alert.alert('ફોલ્ડર હટાવાયું.. ')
                 setLoading(false);
             } catch (error) {
-                // console.log(error);
                 alert('Server is Busy...');
                 setLoading(false);
-            }
-            finally {
             }
         };
 
@@ -448,7 +429,6 @@ export const YearlyFolder = (props) => {
         const [folders, setFolder] = useState([]);
         const [loading, setLoading] = useState(true);
         const usersRef = collection(db, path);
-        // setSum(balanceSum)
         const FarmerDocumentPath = `Traders/${id}/Farmer`;
         const farmerDoc = doc(db, FarmerDocumentPath, farmerId);
         const farmerRef = collection(db, `Traders/${id}/Farmer/`);
@@ -501,27 +481,23 @@ export const YearlyFolder = (props) => {
                         }
                         setFolder([]);
                     }
-
                     setLoading(false);
                 } catch (error) {
                     console.error('Error retrieving data:', error);
                     setLoading(false);
                 }
             };
-
             const unsubscribe = onSnapshot(usersRef, () => {
                 fetchData();
             }, (error) => {
                 console.error('Error retrieving user data:', error);
                 setLoading(false);
             });
-
-            fetchData(); // Fetch initial data
-
+            fetchData();
             return () => {
                 unsubscribe();
             };
-        }, []);
+        }, [farmerRef, farmerDoc, usersRef]);
 
         if (loading) {
             return <ActivityIndicator color="#FFFFFF" />;

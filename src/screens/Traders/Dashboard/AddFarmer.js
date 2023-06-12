@@ -5,10 +5,9 @@ import { AntDesign, FontAwesome5, Entypo, MaterialCommunityIcons, MaterialIcons 
 import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { Modal } from 'react-native-paper';
-import app from '../../../../config/firebase';
 import { useSelector, useDispatch } from 'react-redux';
-import { newFarmer } from '../../../redux/slices/authSlice';
-const auth = getAuth(app);
+import { firebase } from '../../../../config/firebase';
+const auth = getAuth(firebase);
 const db = getFirestore();
 const AddFarmer = ({ isVisible, setVisible }) => {
     const [name, setName] = useState('');
@@ -17,7 +16,7 @@ const AddFarmer = ({ isVisible, setVisible }) => {
     const [Vname, setVName] = useState(true);
     const [VmobileNumber, setVMobileNumber] = useState(true);
     const [Vvillage, setVVillage] = useState(true);
-    const [isLoading, setLoading] = useState(false); // Added isLoading state
+    const [isLoading, setLoading] = useState(false);
     const dispatch = useDispatch();
     const navigation = useNavigation();
     const id = useSelector(state => state.userAuth.id);
@@ -41,7 +40,7 @@ const AddFarmer = ({ isVisible, setVisible }) => {
         if (!validateInputs()) {
             return;
         }
-        setLoading(true); // Set loading state to true
+        setLoading(true);
         const FarmerDocumentPath = `Traders/${id}/Farmer`;
         const farmerDetails = {
             Image: 'https://w7.pngwing.com/pngs/534/724/png-transparent-farmer-agriculture-selling-food-food-vertebrate-agriculture-thumbnail.png',
@@ -63,11 +62,10 @@ const AddFarmer = ({ isVisible, setVisible }) => {
                 navigation.navigate('Dashboard')
             })
             .catch((error) => {
-                // console.log(error)
                 alert("Server is Busy...");
             })
             .finally(() => {
-                setLoading(false); // Set loading state to false
+                setLoading(false);
                 setVisible(false)
             });
     };
@@ -164,24 +162,6 @@ const styles = StyleSheet.create({
         height: 150,
         marginBottom: 20,
     },
-    title: {
-        marginBottom: 20,
-    },
-    typeSelection: {
-        width: '80%',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 20,
-    },
-    radioButton: {
-        backgroundColor: '#53595F',
-        paddingHorizontal: 40,
-        paddingVertical: 15,
-        borderRadius: 5,
-    },
-    radioButtonSelected: {
-        backgroundColor: '#1F242B',
-    },
     inputContainer: {
         marginBottom: 20,
     },
@@ -204,9 +184,6 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 10,
         borderBottomRightRadius: 10,
         paddingHorizontal: 10,
-    },
-    createNew: {
-        marginBottom: 10,
     },
     button: {
         width: '100%',

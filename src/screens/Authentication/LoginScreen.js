@@ -4,17 +4,13 @@ import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons, FontAwesome5, Entypo, MaterialIcons } from '@expo/vector-icons';
 import { useDispatch } from 'react-redux'
 import { setSignIn } from '../../redux/slices/authSlice';
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signInWithPhoneNumber, User } from 'firebase/auth';
-// import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
-import { getFirestore, collection, query, where, getDocs, collectionGroup } from 'firebase/firestore';
-import firebase from 'firebase/compat/app'
-import { firebaseConfig } from '../../../config/firebase';
-import app from '../../../config/firebase';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import VerifyOTP from './VerifyOTP';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const auth = getAuth(app);
-const db = getFirestore(app);
-
+import { firebase } from '../../../config/firebase';
+const auth = getAuth(firebase);
+const db = getFirestore();
 const LoginScreen = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -23,16 +19,11 @@ const LoginScreen = () => {
     const [loading, setLoading] = useState(false);
     const [confirm, setConfirm] = useState('');
     const [isVisible, setVisible] = useState(false);
-    const recaptchaVerifierRef = useRef(null);
-
-    // Validation
     const [Vemail, setVEmail] = useState(true);
     const [Vpassword, setVPassword] = useState(true);
     const [VmobileNumber, setVMobileNumber] = useState(true);
-
     const navigation = useNavigation();
     const dispatch = useDispatch();
-
     useEffect(() => {
         const checkUserLoggedIn = async () => {
             try {
@@ -47,8 +38,7 @@ const LoginScreen = () => {
         };
 
         checkUserLoggedIn();
-    }, []);
-
+    }, [dispatch]);
     const validateInputs = (Type) => {
         let valid = true;
         if (Type === 'Trader') {
@@ -70,19 +60,15 @@ const LoginScreen = () => {
     };
 
     const handleLogin = async () => {
-        if (!validateInputs(userType)) {
+        if (!validateInputs(userType))
             return;
-        }
         setLoading(true);
-
         if (userType === 'Trader') {
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const emailid = userCredential.user.email;
-
                 const usersRef = collection(db, 'Traders');
                 const q = query(usersRef, where('email', '==', emailid));
-
                 const querySnapshot = await getDocs(q);
                 if (!querySnapshot.empty) {
                     const userDoc = querySnapshot.docs[0];
@@ -93,7 +79,6 @@ const LoginScreen = () => {
                         detail: userData,
                         type: 'Traders',
                     };
-
                     dispatch(setSignIn(data));
                     await AsyncStorage.setItem('user', JSON.stringify(data));
                 } else {
@@ -111,13 +96,7 @@ const LoginScreen = () => {
             }
         } else {
             alert('સર્વિસ ઉપલબ્ધ નથી.. ')
-            // setLoading(false)
-            // setVisible(true)
-            // signInWithPhoneNumber(auth, `+91 ${mobileNumber}`, recaptchaVerifierRef.current)
-            //     .then((confirmationResult) => {
-            //         setConfirm(confirmationResult)
-            //     }).catch((error) => {
-            //     });
+            setLoading(false);
         }
     };
 
@@ -127,10 +106,6 @@ const LoginScreen = () => {
 
     return (
         <View style={styles.container}>
-            {/* <FirebaseRecaptchaVerifierModal
-                ref={recaptchaVerifierRef}
-                firebaseConfig={firebaseConfig}
-            /> */}
             <Image source={require('../../../assets/logo.png')} style={styles.logo} />
             <Text style={{ fontFamily: 'piedra-font', color: '#fff', fontSize: 50, letterSpacing: 1, marginBottom: 20 }}>LOGIN</Text>
             <View style={styles.typeSelection}>
@@ -236,9 +211,6 @@ const styles = StyleSheet.create({
         height: 150,
         marginBottom: 20,
     },
-    title: {
-        marginBottom: 20,
-    },
     typeSelection: {
         width: '80%',
         flexDirection: 'row',
@@ -277,11 +249,7 @@ const styles = StyleSheet.create({
         borderBottomRightRadius: 8,
         paddingHorizontal: 10,
     },
-    createNew: {
-        marginBottom: 10,
-    },
     button: {
-        // width: 120,
         backgroundColor: '#1F242B',
         paddingHorizontal: 35,
         paddingVertical: 15,

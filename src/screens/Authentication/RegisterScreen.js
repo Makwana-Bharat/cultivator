@@ -5,7 +5,6 @@ import { MaterialCommunityIcons, FontAwesome5, Ionicons, MaterialIcons } from '@
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import app from '../../../config/firebase';
-
 const auth = getAuth(app);
 const db = getFirestore();
 
@@ -21,7 +20,6 @@ const RegisterScreen = () => {
     const [Vname, setVName] = useState(true);
     const [Vtrade, setVTrade] = useState(true);
     const [Vpassword, setVPassword] = useState(true);
-
     //Other
     const [isLoading, setIsLoading] = useState(false);
     const navigation = useNavigation();
@@ -49,55 +47,10 @@ const RegisterScreen = () => {
     };
     const handleRegister = () => {
         Alert.alert("સર્વિસ ઉપલબ્ધ નથી.. સંપર્ક +91 9409450471  ");
-        return;
-        /*
-
-        Tempory Comment Until Payment Module
-        
-        */
-
-        if (!validateInputs()) {
-            return;
-        }
-        if (password !== repassword) {
-            alert("Passwords do not match");
-            return;
-        }
-
-        setIsLoading(true); // Start the loading indicator
-
-        createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                const userDetails = {
-                    email: email,
-                    name: name,
-                    trade: trade,
-                    Balance: 0,
-                    tradeImg: "https://raw.githubusercontent.com/AJAX-Codder/cultivator/master/assets/Default_avatar.png"
-                };
-                addDoc(collection(db, 'Traders'), userDetails)
-                    .then(() => {
-                        setIsLoading(false); // Stop the loading indicator
-                        Alert.alert('User registered successfully');
-                        navigation.navigate('Login');
-                    })
-                    .catch((error) => {
-                        setIsLoading(false); // Stop the loading indicator
-                        Alert.alert("Server is Busy...");
-                        // Handle the error appropriately (e.g., display an error message).
-                    });
-            })
-            .catch((error) => {
-                setIsLoading(false); // Stop the loading indicator
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                Alert.alert("Something wrong...");
-                // Handle the error appropriately (e.g., display an error message).
-            });
     };
 
     const navigateToRegister = () => {
-        navigation.navigate('Login'); // Replace 'Register' with the appropriate screen name for your register screen
+        navigation.navigate('Login');
     };
 
     return (
@@ -248,24 +201,6 @@ const styles = StyleSheet.create({
         height: 150,
         marginBottom: 20
     },
-    title: {
-        marginBottom: 20
-    },
-    typeSelection: {
-        width: '80%',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 20
-    },
-    radioButton: {
-        backgroundColor: '#53595F',
-        paddingHorizontal: 40,
-        paddingVertical: 15,
-        borderRadius: 5
-    },
-    radioButtonSelected: {
-        backgroundColor: '#1F242B'
-    },
     inputContainer: {
         marginBottom: 20
     },
@@ -288,9 +223,6 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 8,
         borderBottomRightRadius: 8,
         paddingHorizontal: 10
-    },
-    createNew: {
-        marginBottom: 10
     },
     button: {
         width: 150,

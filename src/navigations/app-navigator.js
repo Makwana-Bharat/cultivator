@@ -1,37 +1,24 @@
 import * as React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, Text, TouchableOpacity, Image, Switch } from 'react-native';
 import AddFarmer from '../screens/Traders/Dashboard/AddFarmer';
 import { DashboardScreen } from '../screens/Traders/DashboardScreen';
 import {
     createDrawerNavigator,
-    DrawerContentScrollView,
-    DrawerItemList,
-    DrawerItem,
 } from '@react-navigation/drawer';
-import { AntDesign, Entypo } from '@expo/vector-icons'; // Import AntDesign from vector icon library
+import { AntDesign, Entypo } from '@expo/vector-icons';
 import { YearlyFolder } from '../screens/Traders/YearlyFolder';
 import CropsFolder from '../screens/Traders/CropsFolder';
 import { Invoice } from '../screens/Traders/Invoice';
 import { getAuth, signOut } from "firebase/auth";
-import app from '../../config/firebase';
 import { setSignOut } from '../redux/slices/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import { HandleNotification, HandleBillHeading, HandleCroplyFolder, selectNotification, selectBillHeading, selectCroplyFolder } from '../redux/slices/setting';
+import { HandleBillHeading, HandleCroplyFolder, selectNotification, selectBillHeading, selectCroplyFolder } from '../redux/slices/setting';
 import NewEntry from '../screens/Traders/NewEntry';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const auth = getAuth(app);
+import { firebase } from '../../config/firebase';
+const auth = getAuth(firebase);
 const Drawer = createDrawerNavigator();
-const AccountScreen = () => {
-    return (
-        <View>
-            <Text>Account</Text>
-        </View>
-    );
-};
-
-const CustomHeader = (props, { navigation }) => {
+const CustomHeader = ({ navigation }) => {
     const user = useSelector(state => state.userAuth.detail);
     const trade = user.trade;
     const tradeImg = user.tradeImg;
@@ -39,7 +26,7 @@ const CustomHeader = (props, { navigation }) => {
         <View style={styles.headerContainer}>
             <TouchableOpacity
                 style={styles.menuIcon}
-                onPress={() => props.navigation.toggleDrawer()}
+                onPress={() => navigation.toggleDrawer()}
             >
                 <AntDesign name="menu-unfold" size={24} color="white" />
             </TouchableOpacity>
@@ -62,21 +49,18 @@ const CustomDrawerContent = (props) => {
     const user = useSelector(state => state.userAuth.detail);
     const handleLogout = async () => {
         try {
-            await AsyncStorage.removeItem('user'); // Await the AsyncStorage.removeItem call
+            await AsyncStorage.removeItem('user');
             await signOut(auth);
             alert('LogOut successfully');
             dispatch(setSignOut());
         } catch (error) {
-            // Handle any errors that occur during the logout process
             console.log('Logout error:', error);
-            // Optionally display an error message to the user
             alert('An error occurred during logout. Please try again.');
         }
     };
 
     return (
         <View style={{ flex: 1 }}>
-            {/* Top Section */}
             <View
                 style={{
                     backgroundColor: '#31363C',
@@ -105,8 +89,6 @@ const CustomDrawerContent = (props) => {
                     </Text>
                 </View>
             </View>
-
-            {/* Menu Items */}
             <View
                 style={{
                     margin: 10,
@@ -119,18 +101,7 @@ const CustomDrawerContent = (props) => {
                     Dashboard
                 </Text>
             </View>
-
-            {/* Notification Toggle */}
             <View>
-                {/* <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16 }}>
-                    <Switch
-                        value={Notification}
-                        onValueChange={() => dispatch(HandleNotification(!Notification))}
-                    />
-                    <Text style={{ color: '#fff', marginLeft: 10, fontSize: 16, fontWeight: '400' }}>Notifications</Text>
-                </View> */}
-
-                {/* Other Toggles */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16 }}>
                     <Switch
                         value={BillHeading}
@@ -146,7 +117,6 @@ const CustomDrawerContent = (props) => {
                     <Text style={{ color: '#fff', marginLeft: 10, fontSize: 16, fontWeight: '400' }}>Automatic Folder</Text>
                 </View>
             </View>
-            {/* Logout */}
             <TouchableOpacity
                 onPress={handleLogout}
                 style={{
@@ -171,11 +141,7 @@ const CustomDrawerContent = (props) => {
         </View>
     );
 };
-
 const AppNavigator = () => {
-    const user = useSelector(state => state.userAuth.detail);
-    const dispatch = useDispatch();
-
     return (
         <Drawer.Navigator
             initialRouteName="Dashboard"
@@ -196,20 +162,16 @@ const AppNavigator = () => {
                 <CustomDrawerContent {...props} />
             )}
         >
-            {/* Main Screens */}
-            <Drawer.Screen name="Dashboard" component={DashboardScreen} />
+            <Drawer.Screen name="Dashboard" component={DashboardScreen} options={{ headerShown: true }} />
             <Drawer.Screen name='AddFarmer' component={AddFarmer} options={{ headerShown: false }} />
-            <Drawer.Screen name='Yearly' component={YearlyFolder} />
-            <Drawer.Screen name='Crops' component={CropsFolder} />
-            <Drawer.Screen name='Invoice' component={Invoice} />
-            <Drawer.Screen name="Account" component={AccountScreen} />
+            <Drawer.Screen name='Yearly' component={YearlyFolder} options={{ headerShown: true }} />
+            <Drawer.Screen name='Crops' component={CropsFolder} options={{ headerShown: true }} />
+            <Drawer.Screen name='Invoice' component={Invoice} options={{ headerShown: true }} />
             <Drawer.Screen name='NewEntry' component={NewEntry} options={{ headerShown: false }} />
         </Drawer.Navigator>
     );
 };
-
 export default AppNavigator;
-
 const styles = {
     headerContainer: {
         flexDirection: 'row',
