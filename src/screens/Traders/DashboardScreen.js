@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
-import { addFarmerToDetail } from '../../redux/slices/authSlice';
 import { getFirestore, collection, getDocs, onSnapshot } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { DashboardStyles } from '../../StyleSheet/DashboardCSS';
@@ -37,7 +36,8 @@ export const DashboardScreen = () => {
                 }
                 setLoading(false);
             }, (error) => {
-                Alert.alert('Error retrieving user data:', error);
+                Alert.alert('Error retrieving user data: Limit Exceed..')
+                console.log(error)
             });
         };
 

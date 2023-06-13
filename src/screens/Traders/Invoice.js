@@ -15,10 +15,8 @@ const auth = getAuth(firebase);
 const db = getFirestore();
 export const Invoice = (props) => {
     const farmerIndex = props.route.params.path.indexOf('Farmer') + 'Farmer'.length;
-    const yearlyIndex = props.route.params.path.indexOf('Yearly');
-    const cropsIndex = props.route.params.path.indexOf('Crops');
-    const farmerId = props.route.params.path.substring(farmerIndex + 1, yearlyIndex - 1);
-    const yearId = props.route.params.path.substring(yearlyIndex + 'Yearly'.length + 1, cropsIndex - 1);
+    const cropsIndex = props.route.params.path.indexOf('Folder');
+    const farmerId = props.route.params.path.substring(farmerIndex + 1, cropsIndex - 1);
     const lastIndex = props.route.params.path.lastIndexOf('/');
     const CropDocumentPath = props.route.params.path.substring(0, lastIndex);
     const CropId = props.route.params.path.substring(lastIndex + 1);
@@ -157,16 +155,13 @@ export const Invoice = (props) => {
             <View style={{ flex: 1 }}>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => props.navigation.navigate('Dashboard')}>
-                        <Text style={styles.headerText}>ખેડૂતમિત્રો</Text>
+                        <Text style={styles.headerText}>અનુક્રમણિકા</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        onPress={() => props.navigation.navigate('Yearly', { 'farmerId': farmerId })}>
-                        <Text style={styles.headerText}>/વર્ષો</Text>
+                        onPress={() => props.navigation.navigate('Crops', { 'farmerId': farmerId })}>
+                        <Text style={styles.headerText}>/ખેડૂત</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => props.navigation.navigate('Crops', { 'farmerId': farmerId, year: props.route.params.year, 'yearId': yearId })}>
-                        <Text style={styles.headerText}>/{props.route.params.year}</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.headerText}>/{props.route.params.crop}</Text>
+                    <Text style={styles.headerText}>/ખાતાવહી</Text>
                 </View>
 
                 {/** Invoice*/}

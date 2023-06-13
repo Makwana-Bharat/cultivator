@@ -16,8 +16,9 @@ const LoginScreen = () => {
     const [password, setPassword] = useState('');
     const [mobileNumber, setMobileNumber] = useState('');
     const [userType, setUserType] = useState('Trader');
-    const [loading, setLoading] = useState(false);
     const [confirm, setConfirm] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [loading2, setLoading2] = useState(true);
     const [isVisible, setVisible] = useState(false);
     const [Vemail, setVEmail] = useState(true);
     const [Vpassword, setVPassword] = useState(true);
@@ -34,6 +35,9 @@ const LoginScreen = () => {
                 }
             } catch (error) {
                 alert('Error retrieving user data:');
+            }
+            finally {
+                setLoading2(false)
             }
         };
 
@@ -103,100 +107,107 @@ const LoginScreen = () => {
     const navigateToScreen = (screen) => {
         navigation.navigate(screen);
     };
-
-    return (
-        <View style={styles.container}>
-            <Image source={require('../../../assets/logo.png')} style={styles.logo} />
-            <Text style={{ fontFamily: 'piedra-font', color: '#fff', fontSize: 50, letterSpacing: 1, marginBottom: 20 }}>LOGIN</Text>
-            <View style={styles.typeSelection}>
-                <TouchableOpacity
-                    style={[styles.radioButton, userType === 'Trader' && styles.radioButtonSelected]}
-                    onPress={() => setUserType('Trader')}
-                >
-                    <Text style={{ color: !userType == 'Farmer' ? '#fff' : '#BDBFC2', fontWeight: 'bold', letterSpacing: 1, fontSize: 16 }}>Trader</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.radioButton, userType === 'Farmer' && styles.radioButtonSelected]}
-                    onPress={() => setUserType('Farmer')}
-                >
-                    <Text style={{ color: userType == 'Farmer' ? '#fff' : '#BDBFC2', fontWeight: 'bold', letterSpacing: 1, fontSize: 16 }}>Farmer</Text>
-                </TouchableOpacity>
+    if (loading2) {
+        return (
+            <View style={styles.container}>
+                <ActivityIndicator color={"#fff"} size={"large"} />
             </View>
-            {userType === 'Trader' ? (
-                <View style={styles.inputContainer}>
-                    <View style={[styles.input_group, !Vemail && { borderColor: '#C3533A' }]}>
-                        <MaterialCommunityIcons name="email" size={28} color="#fff" style={{
-                            paddingHorizontal: 8
-                        }} />
-                        <TextInput
-                            onFocus={() => setVEmail(true)}
-                            style={styles.input}
-                            placeholder="Email"
-                            value={email}
-                            inputMode='email'
-                            keyboardType='email-address'
-                            onChangeText={setEmail}
-                            placeholderTextColor="#BDBFC2"
-                        />
-                        {!Vemail && <MaterialIcons name='error' size={24} color={'#C3533A'} style={{ position: 'absolute', left: '90%' }} />}
-                    </View>
-                    <View style={[styles.input_group, !Vpassword && { borderColor: '#C3533A' }]}>
-                        <FontAwesome5 name="lock" size={26} color="#fff" style={{
-                            paddingHorizontal: 11
-                        }} />
-                        <TextInput
-                            onFocus={() => setVPassword(true)}
-                            style={styles.input}
-                            placeholder="Password"
-                            secureTextEntry
-                            value={password}
-                            importantForAutofill='yes'
-                            onChangeText={setPassword}
-                            placeholderTextColor="#BDBFC2"
-                        />
-                        {!Vpassword && <MaterialIcons name='error' size={24} color={'#C3533A'} style={{ position: 'absolute', left: '90%' }} />}
-                    </View>
-
-                    <TouchableOpacity onPress={() => navigateToScreen('Forget')} style={styles.createNew}>
-                        <Text style={{ color: '#BDBFC2' }}> Forgot password?</Text>
+        )
+    }
+    else
+        return (
+            <View style={styles.container}>
+                <Image source={require('../../../assets/logo.png')} style={styles.logo} />
+                <Text style={{ fontFamily: 'piedra-font', color: '#fff', fontSize: 50, letterSpacing: 1, marginBottom: 20 }}>LOGIN</Text>
+                <View style={styles.typeSelection}>
+                    <TouchableOpacity
+                        style={[styles.radioButton, userType === 'Trader' && styles.radioButtonSelected]}
+                        onPress={() => setUserType('Trader')}
+                    >
+                        <Text style={{ color: !userType == 'Farmer' ? '#fff' : '#BDBFC2', fontWeight: 'bold', letterSpacing: 1, fontSize: 16 }}>Trader</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.radioButton, userType === 'Farmer' && styles.radioButtonSelected]}
+                        onPress={() => setUserType('Farmer')}
+                    >
+                        <Text style={{ color: userType == 'Farmer' ? '#fff' : '#BDBFC2', fontWeight: 'bold', letterSpacing: 1, fontSize: 16 }}>Farmer</Text>
                     </TouchableOpacity>
                 </View>
-            ) : (
-                <View style={styles.inputContainer}>
-                    <View style={[styles.input_group, !VmobileNumber && { borderColor: '#C3533A' }]}>
-                        <Entypo name="old-phone" size={28} color="#fff" style={{
-                            paddingHorizontal: 8
-                        }} />
-                        <TextInput
-                            onFocus={() => setVMobileNumber(true)}
-                            style={styles.input}
-                            placeholder="Mobile Number"
-                            value={mobileNumber}
-                            inputMode='numeric'
-                            keyboardType='numeric'
-                            onChangeText={(text) => { setVMobileNumber(true), setMobileNumber(text) }}
-                        />
-                        {!VmobileNumber && <MaterialIcons name='error' size={24} color={'#C3533A'} style={{ position: 'absolute', left: '90%' }} />}
+                {userType === 'Trader' ? (
+                    <View style={styles.inputContainer}>
+                        <View style={[styles.input_group, !Vemail && { borderColor: '#C3533A' }]}>
+                            <MaterialCommunityIcons name="email" size={28} color="#fff" style={{
+                                paddingHorizontal: 8
+                            }} />
+                            <TextInput
+                                onFocus={() => setVEmail(true)}
+                                style={styles.input}
+                                placeholder="Email"
+                                value={email}
+                                inputMode='email'
+                                keyboardType='email-address'
+                                onChangeText={setEmail}
+                                placeholderTextColor="#BDBFC2"
+                            />
+                            {!Vemail && <MaterialIcons name='error' size={24} color={'#C3533A'} style={{ position: 'absolute', left: '90%' }} />}
+                        </View>
+                        <View style={[styles.input_group, !Vpassword && { borderColor: '#C3533A' }]}>
+                            <FontAwesome5 name="lock" size={26} color="#fff" style={{
+                                paddingHorizontal: 11
+                            }} />
+                            <TextInput
+                                onFocus={() => setVPassword(true)}
+                                style={styles.input}
+                                placeholder="Password"
+                                secureTextEntry
+                                value={password}
+                                importantForAutofill='yes'
+                                onChangeText={setPassword}
+                                placeholderTextColor="#BDBFC2"
+                            />
+                            {!Vpassword && <MaterialIcons name='error' size={24} color={'#C3533A'} style={{ position: 'absolute', left: '90%' }} />}
+                        </View>
+
+                        <TouchableOpacity onPress={() => navigateToScreen('Forget')} style={styles.createNew}>
+                            <Text style={{ color: '#BDBFC2' }}> Forgot password?</Text>
+                        </TouchableOpacity>
                     </View>
+                ) : (
+                    <View style={styles.inputContainer}>
+                        <View style={[styles.input_group, !VmobileNumber && { borderColor: '#C3533A' }]}>
+                            <Entypo name="old-phone" size={28} color="#fff" style={{
+                                paddingHorizontal: 8
+                            }} />
+                            <TextInput
+                                onFocus={() => setVMobileNumber(true)}
+                                style={styles.input}
+                                placeholder="Mobile Number"
+                                value={mobileNumber}
+                                inputMode='numeric'
+                                keyboardType='numeric'
+                                onChangeText={(text) => { setVMobileNumber(true), setMobileNumber(text) }}
+                            />
+                            {!VmobileNumber && <MaterialIcons name='error' size={24} color={'#C3533A'} style={{ position: 'absolute', left: '90%' }} />}
+                        </View>
+                    </View>
+                )}
+                <View style={{ width: '80%', display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end' }}>
+                    <TouchableOpacity onPress={handleLogin} style={styles.button}>
+                        {loading ? (
+                            <ActivityIndicator size="small" color="#FFFFFF" /> // Show loader if loading state is true
+                        ) : (
+                            <Text style={styles.buttonText}>{userType === 'Trader' ? 'Login' : 'Send OTP'}</Text>
+                        )}
+                    </TouchableOpacity>
                 </View>
-            )}
-            <View style={{ width: '80%', display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end' }}>
-                <TouchableOpacity onPress={handleLogin} style={styles.button}>
-                    {loading ? (
-                        <ActivityIndicator size="small" color="#FFFFFF" /> // Show loader if loading state is true
-                    ) : (
-                        <Text style={styles.buttonText}>{userType === 'Trader' ? 'Login' : 'Send OTP'}</Text>
-                    )}
-                </TouchableOpacity>
+                {userType === 'Trader' ? (
+                    <TouchableOpacity onPress={() => navigateToScreen('Register')} style={{ marginTop: 50 }}>
+                        <Text style={styles.buttonText}><FontAwesome5 name="hand-point-right" size={24} color="white" />  New Trader ? </Text>
+                    </TouchableOpacity>
+                ) : null}
+                <VerifyOTP isVisible={isVisible} setVisible={setVisible} code={confirm} setcode={setConfirm} />
             </View>
-            {userType === 'Trader' ? (
-                <TouchableOpacity onPress={() => navigateToScreen('Register')} style={{ marginTop: 50 }}>
-                    <Text style={styles.buttonText}><FontAwesome5 name="hand-point-right" size={24} color="white" />  New Trader ? </Text>
-                </TouchableOpacity>
-            ) : null}
-            <VerifyOTP isVisible={isVisible} setVisible={setVisible} code={confirm} setcode={setConfirm} />
-        </View>
-    );
+        );
 };
 
 const styles = StyleSheet.create({

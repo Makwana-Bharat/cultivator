@@ -38,7 +38,7 @@ export const Farmer = ({ farmers, loading }) => {
                                         village: farmer.data.Village,
                                         Balance: farmer.data.Balance
                                     }))
-                                    navigation.navigate('Yearly', { farmerId: farmer.id })
+                                    navigation.navigate('Crops', { farmerId: farmer.id })
                                 }}
                             >
                                 <View style={farmerStyle.content}>

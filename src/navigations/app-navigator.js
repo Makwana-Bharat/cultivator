@@ -6,7 +6,6 @@ import {
     createDrawerNavigator,
 } from '@react-navigation/drawer';
 import { AntDesign, Entypo } from '@expo/vector-icons';
-import { YearlyFolder } from '../screens/Traders/YearlyFolder';
 import CropsFolder from '../screens/Traders/CropsFolder';
 import { Invoice } from '../screens/Traders/Invoice';
 import { getAuth, signOut } from "firebase/auth";
@@ -43,7 +42,6 @@ const CustomHeader = ({ navigation }) => {
 };
 const CustomDrawerContent = (props) => {
     const dispatch = useDispatch();
-    const Notification = useSelector(selectNotification);
     const BillHeading = useSelector(selectBillHeading);
     const CroplyFolder = useSelector(selectCroplyFolder);
     const user = useSelector(state => state.userAuth.detail);
@@ -109,13 +107,6 @@ const CustomDrawerContent = (props) => {
                     />
                     <Text style={{ color: '#fff', marginLeft: 10, fontSize: 16, fontWeight: '400' }}>Bill Heading</Text>
                 </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16 }}>
-                    <Switch
-                        value={CroplyFolder}
-                        onValueChange={() => dispatch(HandleCroplyFolder(!CroplyFolder))}
-                    />
-                    <Text style={{ color: '#fff', marginLeft: 10, fontSize: 16, fontWeight: '400' }}>Automatic Folder</Text>
-                </View>
             </View>
             <TouchableOpacity
                 onPress={handleLogout}
@@ -164,7 +155,6 @@ const AppNavigator = () => {
         >
             <Drawer.Screen name="Dashboard" component={DashboardScreen} options={{ headerShown: true }} />
             <Drawer.Screen name='AddFarmer' component={AddFarmer} options={{ headerShown: false }} />
-            <Drawer.Screen name='Yearly' component={YearlyFolder} options={{ headerShown: true }} />
             <Drawer.Screen name='Crops' component={CropsFolder} options={{ headerShown: true }} />
             <Drawer.Screen name='Invoice' component={Invoice} options={{ headerShown: true }} />
             <Drawer.Screen name='NewEntry' component={NewEntry} options={{ headerShown: false }} />
