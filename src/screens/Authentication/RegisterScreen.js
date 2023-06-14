@@ -4,8 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons, FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
-import app from '../../../config/firebase';
-const auth = getAuth(app);
+import { firebase } from '../../../config/firebase';
+const auth = getAuth(firebase);
 const db = getFirestore();
 
 const RegisterScreen = () => {
