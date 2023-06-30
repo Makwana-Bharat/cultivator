@@ -29,11 +29,10 @@ const NewEntry = ({ isVisible, setVisible, MFID }) => {
             Alert.alert('Error', 'Please Fill Details..');
             return;
         }
-        let Entry = {
-            Balance: amount,
-            Date: date,
-            Detail: detail,
-        };
+        if (type == "જમા ")
+            setLoading1(true);
+        else
+            setLoading2(true);
         const Type = type;
         let newEntry = {
             DATE: date,
@@ -49,18 +48,21 @@ const NewEntry = ({ isVisible, setVisible, MFID }) => {
             },
             body: `MFID=${MFID}&RUPEE=${amount}&DATE=${date}&DETAILS=${detail}&TYPE=${type}`
         }).then(response => response.json()).then(data => {
-            Alert.alert('Success', 'નવી એન્ટ્રી ઉમેરાઈ .. ');
+            if (data.message === "Entry inserted successfully")
+                alert("inserted..");
             setVisible(false);
             dispatch(addEntry({ ...newEntry, IID: data.IID }));
-            console.log(data)
+            setLoading1(false);
+            setLoading2(false);
+        }).catch(() => {
+            setLoading1(false);
+            setLoading2(false);
         }).finally(() => {
+            setVisible(false);
             setAmount('');
             setDate(new Date().toLocaleDateString('en-GB'));
             setToday(new Date());
             setDetail('')
-            setLoading1(false);
-            setLoading2(false);
-            setVisible(false);
         });
     };
     const handleDate = (selectedDate) => {

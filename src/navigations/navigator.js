@@ -27,6 +27,9 @@ const AppRoute = () => {
                     FolderIndex: null,
                     EntryIndex: null
                 };
+                setTimeout(() => {
+                    setLoading(false);
+                }, 2000);
                 dispatch(ModifySelection(modifiedSelection));
                 dispatch(setSignIn({
                     id: data.Trader.SID,
@@ -34,9 +37,6 @@ const AppRoute = () => {
                     traders: data.Trader,
                     selection: modifiedSelection
                 }));
-                setTimeout(() => {
-                    setLoading(false);
-                }, 2000);
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -52,7 +52,6 @@ const AppRoute = () => {
             try {
                 const authValue = await AsyncStorage.getItem('Auth');
                 if (authValue !== null) {
-                    console.log(authValue)
                     await fetchData(authValue);
                 } else {
                     setTimeout(() => {
