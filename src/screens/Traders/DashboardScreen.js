@@ -2,53 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
-import { getFirestore, collection, getDocs, onSnapshot } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
 import { DashboardStyles } from '../../StyleSheet/DashboardCSS';
 import { Farmer } from './Dashboard/Farmer';
 import AddFarmer from './Dashboard/AddFarmer';
-import { firebase } from '../../../config/firebase';
-const auth = getAuth(firebase);
-const db = getFirestore();
+import { selectTraders } from '../../redux/slices/authSlice';
 export const DashboardScreen = () => {
     const [loading, setLoading] = useState(true);
-    const id = useSelector(state => state.userAuth.id);
-    const FarmerDocumentPath = `Traders/${id}/Farmer`;
-    const usersRef = collection(db, FarmerDocumentPath);
     const [isVisible, setVisible] = useState(false);
-    const [Farmers, setFarmers] = useState();
-    const [sum, setSum] = useState(0);
-    useEffect(() => {
-        let unsubscribe;
-        const fetchData = async () => {
-            unsubscribe = onSnapshot(usersRef, (querySnapshot) => {
-                if (!querySnapshot.empty) {
-                    const farmerDocs = querySnapshot.docs.map((doc) => ({
-                        id: doc.id,
-                        data: doc.data(),
-                    })).sort((a, b) => a.data.Name.localeCompare(b.data.Name));
-
-                    const balanceSum = farmerDocs.reduce((sum, farmer) => eval(sum + '+' + farmer.data.Balance), 0);
-                    setSum(balanceSum)
-                    setFarmers(farmerDocs);
-                } else {
-                    setFarmers([]);
-                }
-                setLoading(false);
-            }, (error) => {
-                Alert.alert('Error retrieving user data: Limit Exceed..')
-                console.log(error)
-            });
-        };
-
-        fetchData();
-
-        return () => {
-            if (unsubscribe) {
-                unsubscribe();
-            }
-        };
-    }, [usersRef]);
+    const trader = useSelector(selectTraders);
+    const [Farmers, setFarmers] = useState(trader.Farmer);
+    const [sum, setSum] = useState(0); useEffect(() => {
+        setFarmers(trader.Farmer);
+    }, [trader])
     return (
         <View style={DashboardStyles.container}>
             <View style={DashboardStyles.header}>
@@ -68,14 +33,11 @@ export const DashboardScreen = () => {
                     <FontAwesome name="rupee" size={18} color={sum == 0 ? '#7DAFEA' : sum < 0 ? '#E57158' : '#79B046'} />
                     <Text style={{ color: sum == 0 ? '#7DAFEA' : sum < 0 ? '#E57158' : '#79B046', fontSize: 18, fontWeight: 'bold' }} > {sum}</Text>
                 </View>
-                <TouchableOpacity style={DashboardStyles.fab}
-                    onPress={() => setVisible(true)}
-                >
-                    <FontAwesome5 name='user-plus' size={24}
-                        color='white' />
+                <TouchableOpacity style={DashboardStyles.fab} onPress={() => setVisible(true)}>
+                    <FontAwesome5 name='user-plus' size={24} color='white' />
                 </TouchableOpacity>
             </View>
             <AddFarmer isVisible={isVisible} setVisible={setVisible} />
         </View>
     );
-};
+}

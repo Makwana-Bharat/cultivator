@@ -203,10 +203,13 @@ export const ReadFarmerStyles = StyleSheet.create({
 });
 export const UpdateFarmerStyles = StyleSheet.create({
     container: {
+        position: 'relative',
+        top: -50,
         padding: 12,
-        flex: 1,
+        height: 550,
         borderRadius: 10,
         backgroundColor: '#31363C',
+        width: 320,
         alignItems: 'center',
         justifyContent: 'center',
     },

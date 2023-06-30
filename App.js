@@ -4,12 +4,7 @@ import { Provider } from 'react-redux';
 import AppRoute from './src/navigations/navigator';
 import { store } from './src/redux/store';
 import * as Font from 'expo-font';
-import { ActivityIndicator, View, StyleSheet, Button } from 'react-native';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
-import { firebase } from './config/firebase';
-import { getAuth } from 'firebase/auth';
-const auth = getAuth(firebase);
-const db = getFirestore();
+import { ActivityIndicator, View, StyleSheet } from 'react-native';
 export default function App() {
   const [fontLoaded, setFontLoaded] = useState(false);
   async function loadFonts() {

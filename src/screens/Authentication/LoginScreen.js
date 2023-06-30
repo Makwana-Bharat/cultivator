@@ -2,15 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons, FontAwesome5, Entypo, MaterialIcons } from '@expo/vector-icons';
-import { useDispatch } from 'react-redux'
-import { setSignIn } from '../../redux/slices/authSlice';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import { setSignIn, ModifySelection } from '../../redux/slices/authSlice';
 import VerifyOTP from './VerifyOTP';
+import { useDispatch } from 'react-redux'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { firebase } from '../../../config/firebase';
-const auth = getAuth(firebase);
-const db = getFirestore();
+import URL from '../../../config/URL';
 const LoginScreen = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -18,32 +14,13 @@ const LoginScreen = () => {
     const [userType, setUserType] = useState('Trader');
     const [confirm, setConfirm] = useState('');
     const [loading, setLoading] = useState(false);
-    const [loading2, setLoading2] = useState(true);
+    const [loading2, setLoading2] = useState(false);
     const [isVisible, setVisible] = useState(false);
     const [Vemail, setVEmail] = useState(true);
     const [Vpassword, setVPassword] = useState(true);
     const [VmobileNumber, setVMobileNumber] = useState(true);
     const navigation = useNavigation();
     const dispatch = useDispatch();
-    useEffect(() => {
-        const checkUserLoggedIn = async () => {
-            try {
-                const user = await AsyncStorage.getItem('user');
-                if (user) {
-                    const userData = JSON.parse(user);
-                    dispatch(setSignIn(userData));
-                }
-            } catch (error) {
-                console.log(error)
-                alert('Error retrieving user data:');
-            }
-            finally {
-                setLoading2(false)
-            }
-        };
-
-        checkUserLoggedIn();
-    }, [dispatch]);
     const validateInputs = (Type) => {
         let valid = true;
         if (Type === 'Trader') {
@@ -70,25 +47,33 @@ const LoginScreen = () => {
         setLoading(true);
         if (userType === 'Trader') {
             try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const emailid = userCredential.user.email;
-                const usersRef = collection(db, 'Traders');
-                const q = query(usersRef, where('email', '==', emailid));
-                const querySnapshot = await getDocs(q);
-                if (!querySnapshot.empty) {
-                    const userDoc = querySnapshot.docs[0];
-                    const userData = userDoc.data();
-                    const data = {
-                        isLoggedIn: true,
-                        id: userDoc.id,
-                        detail: userData,
-                        type: 'Traders',
-                    };
-                    dispatch(setSignIn(data));
-                    await AsyncStorage.setItem('user', JSON.stringify(data));
-                } else {
-                    Alert.alert('User not found');
-                }
+                await fetch(`${URL}/APIS/Authentication/Login.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `email=${email}&password=${password}`
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        AsyncStorage.setItem('Auth', data.Trader.SID);
+                        const modifiedSelection = {
+                            TraderId: data.Trader.SID,
+                            FarmerIndex: null,
+                            FolderIndex: null,
+                            EntryIndex: null
+                        };
+                        dispatch(ModifySelection(modifiedSelection));
+                        dispatch(setSignIn({
+                            id: data.Trader.SID,
+                            isLoggedIn: true,
+                            traders: data.Trader,
+                            selection: modifiedSelection
+                        }));
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
             } catch (error) {
                 setEmail('');
                 setPassword('');

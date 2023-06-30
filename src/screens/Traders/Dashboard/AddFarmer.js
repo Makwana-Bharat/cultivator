@@ -2,13 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { AntDesign, FontAwesome5, Entypo, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { Modal } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
-import { firebase } from '../../../../config/firebase';
-const auth = getAuth(firebase);
-const db = getFirestore();
+import URL from "../../../../config/URL"
+import { selectId, addFarmer } from '../../../redux/slices/authSlice';
 const AddFarmer = ({ isVisible, setVisible }) => {
     const [name, setName] = useState('');
     const [mobileNumber, setMobileNumber] = useState('');
@@ -19,7 +16,7 @@ const AddFarmer = ({ isVisible, setVisible }) => {
     const [isLoading, setLoading] = useState(false);
     const dispatch = useDispatch();
     const navigation = useNavigation();
-    const id = useSelector(state => state.userAuth.id);
+    const SID = useSelector(selectId);
     const validateInputs = () => {
         let valid = true;
         if (name == '') {
@@ -36,38 +33,45 @@ const AddFarmer = ({ isVisible, setVisible }) => {
         }
         return valid;
     };
-    const handleFarmer = () => {
+    const handleFarmer = async () => {
         if (!validateInputs()) {
             return;
         }
         setLoading(true);
-        const FarmerDocumentPath = `Traders/${id}/Farmer`;
-        const farmerDetails = {
-            Image: 'https://w7.pngwing.com/pngs/534/724/png-transparent-farmer-agriculture-selling-food-food-vertebrate-agriculture-thumbnail.png',
-            MobileNo: mobileNumber,
-            Name: name,
-            Village: village,
-            Balance: "0",
-            selected: false
-        }
-        let data = {
-            data: farmerDetails
-        }
-        addDoc(collection(db, FarmerDocumentPath), farmerDetails)
-            .then(() => {
+        await fetch(`${URL}/APIS/Farmer_CRUD/Add.php`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `SID=${SID}&Name=${name}&Image=${'https://w7.pngwing.com/pngs/534/724/png-transparent-farmer-agriculture-selling-food-food-vertebrate-agriculture-thumbnail.png'}&Village=${village}&Mobile=${mobileNumber}`
+        }).then(response => response.json())
+            .then(data => {
+                const currentDate = new Date();
+
+                const day = String(currentDate.getDate()).padStart(2, '0');
+                const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+                const year = String(currentDate.getFullYear());
+
+                const formattedDate = `${day}-${month}-${year}`;
+                const newFarmer = {
+                    Name: name,
+                    Village: village,
+                    Mobile: mobileNumber,
+                    Pic: 'https://w7.pngwing.com/pngs/534/724/png-transparent-farmer-agriculture-selling-food-food-vertebrate-agriculture-thumbnail.png',
+                    Balance: 0,
+                    Date: formattedDate,
+                    Folder: {}
+                };
+                dispatch(addFarmer({ ...newFarmer, FID: data.ID }));
+                navigation.navigate('Dashboard')
                 setMobileNumber('')
                 setName('')
                 setVillage('')
                 alert('ખેડૂત ઉમેરાયો.. ');
-                navigation.navigate('Dashboard')
-            })
-            .catch((error) => {
-                alert("Server is Busy...");
-            })
-            .finally(() => {
+            }).finally(() => {
                 setLoading(false);
                 setVisible(false)
-            });
+            })
     };
     return (
         <Modal animationType="slide" visible={isVisible} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>

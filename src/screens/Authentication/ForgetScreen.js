@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons, FontAwesome5, AntDesign } from '@expo/vector-icons';
-import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
-import { firebase } from '../../../config/firebase';
-const auth = getAuth(firebase);
 const ForgetScreen = () => {
     const [email, setEmail] = useState('');
     const navigation = useNavigation();

@@ -12,17 +12,10 @@ import {
 import { AntDesign, FontAwesome5, FontAwesome } from '@expo/vector-icons';
 import { Modal } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
-import { getAuth } from 'firebase/auth';
-import { firebase } from '../../../config/firebase';
-import {
-    getFirestore,
-    collection,
-    addDoc,
-} from 'firebase/firestore';
 import DateTimePicker from '@react-native-community/datetimepicker';
-const auth = getAuth(firebase);
-const db = getFirestore();
-const NewEntry = ({ isVisible, setVisible, path }) => {
+import { addEntry } from '../../redux/slices/authSlice';
+import URL from '../../../config/URL';
+const NewEntry = ({ isVisible, setVisible, MFID }) => {
     const [amount, setAmount] = useState('');
     const [detail, setDetail] = useState('');
     const [isLoading1, setLoading1] = useState(false);
@@ -30,7 +23,8 @@ const NewEntry = ({ isVisible, setVisible, path }) => {
     const [date, setDate] = useState(new Date().toLocaleDateString('en-GB'));
     const [today, setToday] = useState(new Date());
     const [dateVisible, setDateVisible] = useState(false);
-    const handleEntry = (type) => {
+    const dispatch = useDispatch();
+    const handleEntry = async (type) => {
         if (amount === '' || detail === '') {
             Alert.alert('Error', 'Please Fill Details..');
             return;
@@ -40,22 +34,34 @@ const NewEntry = ({ isVisible, setVisible, path }) => {
             Date: date,
             Detail: detail,
         };
-        addDoc(collection(db, `${path}/${type}`), Entry)
-            .then(() => {
-                Alert.alert('Success', 'નવી એન્ટ્રી ઉમેરાઈ .. ');
-            })
-            .catch((error) => {
-                Alert.alert('Server is Busy...');
-            })
-            .finally(() => {
-                setAmount('');
-                setDate(new Date().toLocaleDateString('en-GB'));
-                setToday(new Date());
-                setDetail('')
-                setLoading1(false);
-                setLoading2(false);
-                setVisible(false);
-            });
+        const Type = type;
+        let newEntry = {
+            DATE: date,
+            DETAILS: detail,
+            RUPEE: parseInt(amount),
+            TYPE: Type
+        }
+
+        await fetch(`${URL}APIS/Invoice_CRUD/Add.php`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `MFID=${MFID}&RUPEE=${amount}&DATE=${date}&DETAILS=${detail}&TYPE=${type}`
+        }).then(response => response.json()).then(data => {
+            Alert.alert('Success', 'નવી એન્ટ્રી ઉમેરાઈ .. ');
+            setVisible(false);
+            dispatch(addEntry({ ...newEntry, IID: data.IID }));
+            console.log(data)
+        }).finally(() => {
+            setAmount('');
+            setDate(new Date().toLocaleDateString('en-GB'));
+            setToday(new Date());
+            setDetail('')
+            setLoading1(false);
+            setLoading2(false);
+            setVisible(false);
+        });
     };
     const handleDate = (selectedDate) => {
         setToday(selectedDate);
@@ -149,7 +155,7 @@ const NewEntry = ({ isVisible, setVisible, path }) => {
                     }}
                 >
                     <TouchableOpacity
-                        onPress={() => handleEntry('જમા')}
+                        onPress={() => handleEntry('જમા ')}
                         style={[
                             styles.button,
                             { backgroundColor: '#8ABA5D', borderColor: '#8ABA5D' },

@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
+import { ModifySelection, setSignIn } from '../../redux/slices/authSlice';
+import { useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons, FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
-import { firebase } from '../../../config/firebase';
-const auth = getAuth(firebase);
-const db = getFirestore();
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import URL from '../../../config/URL';
 const RegisterScreen = () => {
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
@@ -23,7 +21,7 @@ const RegisterScreen = () => {
     //Other
     const [isLoading, setIsLoading] = useState(false);
     const navigation = useNavigation();
-
+    const dispatch = useDispatch();
 
     const validateInputs = () => {
         let valid = true;
@@ -46,7 +44,46 @@ const RegisterScreen = () => {
         return valid;
     };
     const handleRegister = () => {
-        Alert.alert("સર્વિસ ઉપલબ્ધ નથી.. સંપર્ક +91 9409450471  ");
+        if (validateInputs()) {
+            fetch(`${URL}/APIS/Authentication/Register.php`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `name=${name}&email=${email}&password=${password}&trade=${trade}&trade_img=${'https://raw.githubusercontent.com/AJAX-Codder/cultivator/master/assets/Default_avatar.png'}`
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.message = "Trader inserted successfully") {
+                        fetch(`${URL}/APIS/Authentication/Login.php`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: `email=${email}&password=${password}`
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                AsyncStorage.setItem('Auth', email);
+                                const modifiedSelection = {
+                                    TraderId: data.Trader.SID,
+                                    FarmerIndex: null,
+                                    FolderIndex: null,
+                                    EntryIndex: null
+                                };
+                                dispatch(ModifySelection(modifiedSelection));
+                                dispatch(setSignIn({
+                                    id: data.Trader.SID,
+                                    isLoggedIn: true,
+                                    traders: data.Trader,
+                                    selection: modifiedSelection
+                                }));
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            });
+                    }
+                })
+        }
     };
 
     const navigateToRegister = () => {
