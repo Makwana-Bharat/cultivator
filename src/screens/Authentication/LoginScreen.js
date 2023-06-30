@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { MaterialCommunityIcons, FontAwesome5, Entypo, MaterialIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, FontAwesome5, Entypo, MaterialIcons, Feather } from '@expo/vector-icons';
 import { setSignIn, ModifySelection } from '../../redux/slices/authSlice';
 import VerifyOTP from './VerifyOTP';
 import { useDispatch } from 'react-redux'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import URL from '../../../config/URL';
+import { Snackbar } from 'react-native-paper';
 const LoginScreen = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -19,6 +20,8 @@ const LoginScreen = () => {
     const [Vemail, setVEmail] = useState(true);
     const [Vpassword, setVPassword] = useState(true);
     const [VmobileNumber, setVMobileNumber] = useState(true);
+    const [visibleMsg, setVisibleMsg] = useState(false);
+    const [response, setResponse] = useState(false);
     const navigation = useNavigation();
     const dispatch = useDispatch();
     const validateInputs = (Type) => {
@@ -56,20 +59,31 @@ const LoginScreen = () => {
                 })
                     .then(response => response.json())
                     .then(data => {
-                        AsyncStorage.setItem('Auth', data.Trader.SID);
-                        const modifiedSelection = {
-                            TraderId: data.Trader.SID,
-                            FarmerIndex: null,
-                            FolderIndex: null,
-                            EntryIndex: null
-                        };
-                        dispatch(ModifySelection(modifiedSelection));
-                        dispatch(setSignIn({
-                            id: data.Trader.SID,
-                            isLoggedIn: true,
-                            traders: data.Trader,
-                            selection: modifiedSelection
-                        }));
+                        setVisibleMsg(true);
+                        setResponse(data.status);
+                        if (data.status == "error") {
+                            setEmail('');
+                            setPassword('');
+                            AsyncStorage.removeItem('Auth');
+                        }
+                        else {
+                            AsyncStorage.setItem('Auth', data.Trader.SID);
+                            setTimeout(() => {
+                                const modifiedSelection = {
+                                    TraderId: data.Trader.SID,
+                                    FarmerIndex: null,
+                                    FolderIndex: null,
+                                    EntryIndex: null
+                                };
+                                dispatch(ModifySelection(modifiedSelection));
+                                dispatch(setSignIn({
+                                    id: data.Trader.SID,
+                                    isLoggedIn: true,
+                                    traders: data.Trader,
+                                    selection: modifiedSelection
+                                }));
+                            }, 1000);
+                        }
                     })
                     .catch(error => {
                         console.error('Error:', error);
@@ -79,8 +93,7 @@ const LoginScreen = () => {
                 setPassword('');
                 const errorCode = error.code;
                 const errorMessage = error.message;
-                Alert.alert('Login Failed');
-                console.log(error)
+                alert('wrong')
             } finally {
                 setLoading(false);
             }
@@ -192,6 +205,16 @@ const LoginScreen = () => {
                     </TouchableOpacity>
                 ) : null}
                 <VerifyOTP isVisible={isVisible} setVisible={setVisible} code={confirm} setcode={setConfirm} />
+                <Snackbar
+                    style={{ backgroundColor: '#1F242B', }}
+                    visible={visibleMsg}
+                    onDismiss={() => setVisibleMsg(false)}>
+                    <View style={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingRight: 10, paddingVertical: 2 }}>
+                        <Text style={{ color: response !== "error" ? '#79B046' : '#E57158', fontWeight: 'bold', letterSpacing: .8 }}>{response !== "error" ? `Successfully Login` : 'invalid email or password..!'}</Text>
+                        {response !== "error" && <Feather name='check-circle' color={'#79B046'} size={19} />}
+                        {response === "error" && <MaterialIcons name='error-outline' color={'#E57158'} size={19} />}
+                    </View>
+                </Snackbar>
             </View>
         );
 };

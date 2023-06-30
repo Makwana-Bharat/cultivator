@@ -19,28 +19,24 @@ export const Invoice = () => {
     const [Udhar, setUdhar] = useState({});
     const [Jama, setJama] = useState({});
     const dispatch = useDispatch();
-    var Invoice;
-    if (selectedIndex.FolderIndex !== null)
+    var Invoice = null;
+    if (!(selectedIndex.FarmerIndex === null || selectedIndex.FarmerIndex === undefined || selectedIndex.FolderIndex === null || selectedIndex.FolderIndex === undefined))
         Invoice = trader.Farmer[selectedIndex.FarmerIndex].Folder[selectedIndex.FolderIndex].Invoice;
     useEffect(() => {
         let udharTotal = 0;
         let jamaTotal = 0;
-
-        // Iterate over the invoices and calculate the sums
+        if (Invoice == null)
+            return;
         Object.keys(Invoice).forEach((key) => {
             const invoice = Invoice[key];
             if (invoice.TYPE === "ઉધાર") {
-                // Add the invoice to the Udhar state
                 setUdhar((prevUdhar) => ({ ...prevUdhar, [key]: invoice }));
                 udharTotal += parseInt(invoice.RUPEE, 10); // Assuming RUPEE is the field for the amount
             } else {
-                // Add the invoice to the Jama state
                 setJama((prevJama) => ({ ...prevJama, [key]: invoice }));
                 jamaTotal += parseInt(invoice.RUPEE, 10); // Assuming RUPEE is the field for the amount
             }
         });
-
-        // Update the UdharSum and JamaSum states
         setUdharSum(udharTotal);
         setJamaSum(jamaTotal);
     }, [Invoice]);
@@ -76,7 +72,7 @@ export const Invoice = () => {
         )
     }
     const navigation = useNavigation();
-    if (selectedIndex.FarmerIndex === null || selectedIndex.FarmerIndex === undefined)
+    if (selectedIndex.FarmerIndex === null || selectedIndex.FarmerIndex === undefined || selectedIndex.FolderIndex === null || selectedIndex.FolderIndex === undefined)
         return <></>
     else
         return (
@@ -84,14 +80,12 @@ export const Invoice = () => {
                 <View style={{ flex: 1 }}>
                     <View style={styles.header}>
                         <TouchableOpacity onPress={() => {
-                            dispatch(ModifySelection({ ...selectedIndex, FarmerIndex: null }));
                             navigation.navigate('Dashboard')
                         }}>
                             <Text style={styles.headerText}>અનુક્રમણિકા</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => {
-                                dispatch(ModifySelection({ ...selectedIndex, FolderIndex: null }));
                                 navigation.navigate('Folders');
                             }}>
                             <Text style={styles.headerText}>/ખેડૂત</Text>

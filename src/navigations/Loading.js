@@ -1,22 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, Image, StyleSheet, Animated } from 'react-native';
-import * as Font from 'expo-font';
 const Loading = () => {
     const animatedValue = useRef(new Animated.Value(0)).current;
-    const [fontLoaded, setFontLoaded] = useState(false);
-    async function loadFonts() {
-        try {
-            await Font.loadAsync({
-                'piedra-font': require('../../assets/fonts/Piedra-Regular.ttf'),
-            });
-            setFontLoaded(true);
-        } catch (error) {
-            console.error('Error loading fonts:', error);
-        }
-    }
-    useEffect(() => {
-        loadFonts();
-    }, []);
     useEffect(() => {
         startAnimation();
     }, []);
@@ -37,7 +22,6 @@ const Loading = () => {
             ])
         ).start();
     };
-
     const containerStyle = {
         transform: [
             {
@@ -49,7 +33,6 @@ const Loading = () => {
         ],
         opacity: animatedValue,
     };
-
     return (
         <View style={styles.container}>
             <Animated.View style={[styles.container, containerStyle]}>

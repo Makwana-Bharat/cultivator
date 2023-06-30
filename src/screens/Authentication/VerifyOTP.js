@@ -2,62 +2,70 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { Modal } from 'react-native-paper';
-const VerifyOTP = ({ isVisible, setVisible, code, setcode }) => {
-    return <></>
-    // const [isLoading, setLoading] = useState(false);
-    // const [OTP, setOTP] = useState();
-    // const Verify = () => {
-    //     setLoading(true);
-    //     code.confirm(OTP).then((result) => {
-    //         Alert.alert("Success",
-    //             "Verification Done..."
-    //         )
-    //     }).catch((error) => {
-    //         Alert.alert('Error', 'Wrong OTP')
-    //     }).finally(() => {
-    //         setLoading(false)
-    //         setVisible(false)
-    //     })
-    // };
-    // return (
-    //     <Modal animationType="slide" visible={isVisible} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-    //         <View style={styles.container}>
-    //             <TouchableOpacity onPress={() => setVisible(false)} style={{
-    //                 position: 'absolute',
-    //                 top: 10,
-    //                 right: 10,
-    //                 backgroundColor: '#1F242B',
-    //                 padding: 6,
-    //                 borderRadius: 20
-    //             }} >
-    //                 <AntDesign name='close' size={18} color='#fff' />
-    //             </TouchableOpacity>
-    //             <Image source={require('../../../assets/logo.png')} style={styles.logo} />
-    //             <View style={styles.inputContainer}>
-    //                 <View style={styles.input_group}>
-    //                     <TextInput
-    //                         style={styles.input}
-    //                         placeholder="000000 "
-    //                         value={OTP}
-    //                         inputMode='numeric'
-    //                         keyboardType='number-pad'
-    //                         onChangeText={setOTP}
-    //                         placeholderTextColor="#BDBFC2"
-    //                     />
-    //                 </View>
-    //             </View>
-    //             <View style={{ width: '80%', display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end' }}>
-    //                 <TouchableOpacity onPress={Verify} style={styles.button} disabled={isLoading}>
-    //                     {isLoading ? (
-    //                         <ActivityIndicator color="#FFFFFF" />
-    //                     ) : (
-    //                         <Text style={styles.buttonText}>VerifyOTP</Text>
-    //                     )}
-    //                 </TouchableOpacity>
-    //             </View>
-    //         </View>
-    //     </Modal>
-    // );
+import URL from '../../../config/URL';
+import { useNavigation } from '@react-navigation/native';
+const VerifyOTP = ({ isVisible, setVisible }) => {
+    const [isLoading, setLoading] = useState(false);
+    const [OTP, setOTP] = useState();
+    const naviation = useNavigation();
+    const Verify = async () => {
+        setLoading(true);
+        await fetch(`${URL}/PHP/Verify_OTP.php`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `UserOTP=${OTP}`
+        })
+            .then(response => response.json())
+            .then(data => {
+
+                (data.status !== "error") && naviation.navigate('Reset');
+                Alert.alert(data.status, data.message)
+            }).finally(() => {
+                setLoading(false);
+                setVisible(false);
+            });
+    };
+    return (
+        <Modal animationType="slide" visible={isVisible} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <View style={styles.container}>
+                <TouchableOpacity onPress={() => setVisible(false)} style={{
+                    position: 'absolute',
+                    top: 10,
+                    right: 10,
+                    backgroundColor: '#1F242B',
+                    padding: 6,
+                    borderRadius: 20
+                }} >
+                    <AntDesign name='close' size={18} color='#fff' />
+                </TouchableOpacity>
+                <Image source={require('../../../assets/logo.png')} style={styles.logo} />
+                <View style={styles.inputContainer}>
+                    <View style={styles.input_group}>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="000000 "
+                            value={OTP}
+                            inputMode='numeric'
+                            keyboardType='number-pad'
+                            onChangeText={setOTP}
+                            placeholderTextColor="#BDBFC2"
+                        />
+                    </View>
+                </View>
+                <View style={{ width: '80%', display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end' }}>
+                    <TouchableOpacity onPress={Verify} style={styles.button} disabled={isLoading}>
+                        {isLoading ? (
+                            <ActivityIndicator color="#FFFFFF" />
+                        ) : (
+                            <Text style={styles.buttonText}>VerifyOTP</Text>
+                        )}
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
+    );
 };
 
 const styles = StyleSheet.create({

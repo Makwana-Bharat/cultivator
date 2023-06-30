@@ -21,22 +21,30 @@ const AppRoute = () => {
         })
             .then(response => response.json())
             .then(data => {
-                const modifiedSelection = {
-                    TraderId: data.Trader.SID,
-                    FarmerIndex: null,
-                    FolderIndex: null,
-                    EntryIndex: null
-                };
-                setTimeout(() => {
-                    setLoading(false);
-                }, 2000);
-                dispatch(ModifySelection(modifiedSelection));
-                dispatch(setSignIn({
-                    id: data.Trader.SID,
-                    isLoggedIn: true,
-                    traders: data.Trader,
-                    selection: modifiedSelection
-                }));
+                if (data.message == "User not found") {
+                    AsyncStorage.removeItem('Auth');
+                    setTimeout(() => {
+                        setLoading(false);
+                    }, 3000);
+                }
+                else {
+                    const modifiedSelection = {
+                        TraderId: data.Trader.SID,
+                        FarmerIndex: null,
+                        FolderIndex: null,
+                        EntryIndex: null
+                    };
+                    dispatch(ModifySelection(modifiedSelection));
+                    dispatch(setSignIn({
+                        id: data.Trader.SID,
+                        isLoggedIn: true,
+                        traders: data.Trader,
+                        selection: modifiedSelection
+                    }));
+                    setTimeout(() => {
+                        setLoading(false);
+                    }, 3000);
+                }
             })
             .catch(error => {
                 console.error('Error:', error);

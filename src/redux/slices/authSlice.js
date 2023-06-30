@@ -25,8 +25,6 @@ const authSlice = createSlice({
             state.isLoggedIn = false;
         },
         addFarmer: (state, action) => {
-            if (state.traders.Farmer == null || state.traders.Farmer === undefined)
-                state.traders.Farmer = {};
             state.traders.Farmer[action.payload.FID] = action.payload;
         },
         removeFarmer: (state, action) => {

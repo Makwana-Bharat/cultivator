@@ -5,6 +5,8 @@ import AppRoute from './src/navigations/navigator';
 import { store } from './src/redux/store';
 import * as Font from 'expo-font';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import ToastManager from 'toastify-react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 export default function App() {
   const [fontLoaded, setFontLoaded] = useState(false);
   async function loadFonts() {
@@ -28,10 +30,13 @@ export default function App() {
     );
   }
   return (
-    <Provider store={store}>
-      <AppRoute />
-      <StatusBar style="auto" />
-    </Provider>
+    <SafeAreaProvider style={{ backgroundColor: '#31363C' }}>
+      <Provider store={store}>
+        <ToastManager />
+        <AppRoute />
+        <StatusBar style="auto" />
+      </Provider>
+    </SafeAreaProvider>
   );
 }
 const styles = StyleSheet.create({

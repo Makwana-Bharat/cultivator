@@ -3,16 +3,16 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, Acti
 import { ModifySelection, setSignIn } from '../../redux/slices/authSlice';
 import { useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
-import { MaterialCommunityIcons, FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, FontAwesome5, Ionicons, MaterialIcons, Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import URL from '../../../config/URL';
+import { Snackbar } from 'react-native-paper';
 const RegisterScreen = () => {
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
     const [trade, setTrade] = useState('');
     const [password, setPassword] = useState('');
     const [repassword, setRePassword] = useState('');
-
     //validation
     const [Vemail, setVEmail] = useState(true);
     const [Vname, setVName] = useState(true);
@@ -20,6 +20,8 @@ const RegisterScreen = () => {
     const [Vpassword, setVPassword] = useState(true);
     //Other
     const [isLoading, setIsLoading] = useState(false);
+    const [visible, setVisible] = useState(false);
+    const [response, setResponse] = useState(false);
     const navigation = useNavigation();
     const dispatch = useDispatch();
 
@@ -45,15 +47,19 @@ const RegisterScreen = () => {
     };
     const handleRegister = () => {
         if (validateInputs()) {
+            setIsLoading(true);
             fetch(`${URL}/APIS/Authentication/Register.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                body: `name=${name}&email=${email}&password=${password}&trade=${trade}&trade_img=${'https://raw.githubusercontent.com/AJAX-Codder/cultivator/master/assets/Default_avatar.png'}`
+                body: `name=${name}&email=${email}&password=${password}&trade=${trade}&trade_img=${'https://devforum-uploads.s3.dualstack.us-east-2.amazonaws.com/uploads/original/4X/1/0/e/10e6c0a439e17280a6f3fa6ae059819af5517efd.png'}`
             }).then(response => response.json())
                 .then(data => {
-                    if (data.message = "Trader inserted successfully") {
+                    setResponse(data.status);
+                    setVisible(true)
+                    setIsLoading(false)
+                    if (data.status == "success") {
                         fetch(`${URL}/APIS/Authentication/Login.php`, {
                             method: 'POST',
                             headers: {
@@ -63,24 +69,31 @@ const RegisterScreen = () => {
                         })
                             .then(response => response.json())
                             .then(data => {
-                                AsyncStorage.setItem('Auth', email);
-                                const modifiedSelection = {
-                                    TraderId: data.Trader.SID,
-                                    FarmerIndex: null,
-                                    FolderIndex: null,
-                                    EntryIndex: null
-                                };
-                                dispatch(ModifySelection(modifiedSelection));
-                                dispatch(setSignIn({
-                                    id: data.Trader.SID,
-                                    isLoggedIn: true,
-                                    traders: data.Trader,
-                                    selection: modifiedSelection
-                                }));
+                                setVisible(true);
+                                setIsLoading(false)
+                                setTimeout(() => {
+                                    AsyncStorage.setItem('Auth', data.Trader.SID);
+                                    const modifiedSelection = {
+                                        TraderId: data.Trader.SID,
+                                        FarmerIndex: null,
+                                        FolderIndex: null,
+                                        EntryIndex: null
+                                    };
+                                    dispatch(ModifySelection(modifiedSelection));
+                                    dispatch(setSignIn({
+                                        id: data.Trader.SID,
+                                        isLoggedIn: true,
+                                        traders: data.Trader,
+                                        selection: modifiedSelection
+                                    }));
+                                }, 1000);
                             })
                             .catch(error => {
                                 console.error('Error:', error);
                             });
+                    }
+                    else {
+                        setIsLoading(false)
                     }
                 })
         }
@@ -221,6 +234,16 @@ const RegisterScreen = () => {
                     Already Have Account ? <FontAwesome5 name="hand-point-left" size={24} color="white" />
                 </Text>
             </TouchableOpacity>
+            <Snackbar
+                style={{ backgroundColor: '#1F242B', }}
+                visible={visible}
+                onDismiss={() => setVisible(false)}>
+                <View style={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingRight: 10, paddingVertical: 2 }}>
+                    <Text style={{ color: response !== "error" ? '#79B046' : '#E57158', fontWeight: 'bold', letterSpacing: .8 }}>{response !== "error" ? `You are registered on ${name}` : 'email already exists..!'}</Text>
+                    {response !== "error" && <Feather name='check-circle' color={'#79B046'} size={19} />}
+                    {response === "error" && <MaterialIcons name='error-outline' color={'#E57158'} size={19} />}
+                </View>
+            </Snackbar>
         </View>
     );
 };

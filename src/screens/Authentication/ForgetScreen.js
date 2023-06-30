@@ -1,18 +1,32 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons, FontAwesome5, AntDesign } from '@expo/vector-icons';
+import URL from '../../../config/URL';
+import { Alert } from 'react-native';
+import VerifyOTP from './VerifyOTP';
 const ForgetScreen = () => {
     const [email, setEmail] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [isVisible, setVisible] = useState(false);
     const navigation = useNavigation();
-    const handleForget = () => {
-        sendPasswordResetEmail(auth, email)
-            .then(() => {
-                alert('Password reset email sent');
-            })
-            .catch((error) => {
-                alert('ખાતું ઉપલબ્ધ નથી.. ');
-            }).finally(() => navigateToScreen('Login'));
+    const handleForget = async () => {
+        setLoading(true)
+        await fetch(`${URL}/PHP/ChangePass.php`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `EMAIL=${email}`
+        })
+            .then(response => response.json())
+            .then(data => {
+
+                (data.status !== "error") && setVisible(true);
+                Alert.alert(data.status, data.message)
+            }).finally(() => {
+                setLoading(false);
+            });
     };
     const navigateToScreen = (screen) => {
         navigation.navigate(screen);
@@ -46,12 +60,16 @@ const ForgetScreen = () => {
             </View>
             <View style={{ width: '80%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 <TouchableOpacity onPress={handleForget} style={styles.button}>
-                    <Text style={styles.buttonText}>Send OTP</Text>
+                    {loading ? (
+                        <ActivityIndicator size="small" color="#FFFFFF" /> // Show loader if loading state is true
+                    ) : (<Text style={styles.buttonText}>Send OTP</Text>
+                    )}
                 </TouchableOpacity>
             </View>
             <TouchableOpacity onPress={() => navigateToScreen('Register')} style={{ position: 'absolute', bottom: 10 }}>
                 <Text style={styles.buttonText}><FontAwesome5 name="hand-point-right" size={24} color="white" />  New Trader ? </Text>
             </TouchableOpacity>
+            <VerifyOTP isVisible={isVisible} setVisible={setVisible} />
         </View>
 
     );

@@ -48,10 +48,10 @@ const NewEntry = ({ isVisible, setVisible, MFID }) => {
             },
             body: `MFID=${MFID}&RUPEE=${amount}&DATE=${date}&DETAILS=${detail}&TYPE=${type}`
         }).then(response => response.json()).then(data => {
+            dispatch(addEntry({ ...newEntry, IID: data.IID }));
             if (data.message === "Entry inserted successfully")
                 alert("inserted..");
             setVisible(false);
-            dispatch(addEntry({ ...newEntry, IID: data.IID }));
             setLoading1(false);
             setLoading2(false);
         }).catch(() => {

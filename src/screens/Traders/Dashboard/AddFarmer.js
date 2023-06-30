@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { AntDesign, FontAwesome5, Entypo, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { AntDesign, FontAwesome5, Entypo, Feather, MaterialIcons } from '@expo/vector-icons';
 import { Modal } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import URL from "../../../../config/URL"
 import { selectId, addFarmer } from '../../../redux/slices/authSlice';
+import { Snackbar } from 'react-native-paper';
 const AddFarmer = ({ isVisible, setVisible }) => {
     const [name, setName] = useState('');
     const [mobileNumber, setMobileNumber] = useState('');
@@ -16,6 +17,8 @@ const AddFarmer = ({ isVisible, setVisible }) => {
     const [isLoading, setLoading] = useState(false);
     const dispatch = useDispatch();
     const navigation = useNavigation();
+    const [visibleMsg, setVisibleMsg] = useState(false);
+    const [response, setResponse] = useState(false);
     const SID = useSelector(selectId);
     const validateInputs = () => {
         let valid = true;
@@ -46,34 +49,39 @@ const AddFarmer = ({ isVisible, setVisible }) => {
             body: `SID=${SID}&Name=${name}&Image=${'https://w7.pngwing.com/pngs/534/724/png-transparent-farmer-agriculture-selling-food-food-vertebrate-agriculture-thumbnail.png'}&Village=${village}&Mobile=${mobileNumber}`
         }).then(response => response.json())
             .then(data => {
-                const currentDate = new Date();
+                setResponse(data.status)
+                setVisibleMsg(true);
+                setTimeout(() => {
+                    setMobileNumber('')
+                    setName('')
+                    setVillage('')
+                    if (data.status !== "success") {
+                        return;
+                    }
+                    const currentDate = new Date();
+                    const day = String(currentDate.getDate()).padStart(2, '0');
+                    const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+                    const year = String(currentDate.getFullYear());
 
-                const day = String(currentDate.getDate()).padStart(2, '0');
-                const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-                const year = String(currentDate.getFullYear());
-
-                const formattedDate = `${day}-${month}-${year}`;
-                const newFarmer = {
-                    Name: name,
-                    Village: village,
-                    Mobile: mobileNumber,
-                    Pic: 'https://w7.pngwing.com/pngs/534/724/png-transparent-farmer-agriculture-selling-food-food-vertebrate-agriculture-thumbnail.png',
-                    Balance: 0,
-                    Date: formattedDate,
-                    Folder: {}
-                };
-                dispatch(addFarmer({ ...newFarmer, FID: data.ID }));
-                navigation.navigate('Dashboard')
-                setMobileNumber('')
-                setName('')
-                setVillage('')
-                alert('ખેડૂત ઉમેરાયો.. ');
+                    const formattedDate = `${day}-${month}-${year}`;
+                    const newFarmer = {
+                        Name: name,
+                        Village: village,
+                        Mobile: mobileNumber,
+                        Pic: 'https://w7.pngwing.com/pngs/534/724/png-transparent-farmer-agriculture-selling-food-food-vertebrate-agriculture-thumbnail.png',
+                        Balance: 0,
+                        Date: formattedDate,
+                        Folder: {}
+                    };
+                    dispatch(addFarmer({ ...newFarmer, FID: data.ID }));
+                    navigation.navigate('Dashboard')
+                }, 1000);
             }).finally(() => {
                 setLoading(false);
                 setVisible(false)
             })
     };
-    return (
+    return (<>
         <Modal animationType="slide" visible={isVisible} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <View style={styles.container}>
                 <TouchableOpacity onPress={() => setVisible(false)} style={{
@@ -148,6 +156,17 @@ const AddFarmer = ({ isVisible, setVisible }) => {
                 </View>
             </View>
         </Modal>
+        <Snackbar
+            style={{ backgroundColor: '#1F242B', }}
+            visible={visibleMsg}
+            onDismiss={() => setVisibleMsg(false)}>
+            <View style={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingRight: 10, paddingVertical: 2 }}>
+                <Text style={{ color: response !== "error" ? '#79B046' : '#E57158', fontWeight: 'bold', letterSpacing: .8 }}>{response !== "error" ? `સફળતાપૂર્વક ખેડૂત ઉમેરાયો` : 'કૈંક વાંધો છે..!'}</Text>
+                {response !== "error" && <Feather name='check-circle' color={'#79B046'} size={19} />}
+                {response === "error" && <MaterialIcons name='error-outline' color={'#E57158'} size={19} />}
+            </View>
+        </Snackbar>
+    </>
     );
 };
 

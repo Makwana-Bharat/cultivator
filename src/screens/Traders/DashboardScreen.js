@@ -11,9 +11,12 @@ export const DashboardScreen = () => {
     const [isVisible, setVisible] = useState(false);
     const trader = useSelector(selectTraders);
     const [Farmers, setFarmers] = useState(trader.Farmer);
-    const [sum, setSum] = useState(0); useEffect(() => {
-        setFarmers(trader.Farmer);
-    }, [trader])
+    const [sum, setSum] = useState(0);
+    useEffect(() => {
+        setFarmers(trader.Farmer)
+        const balanceSum = Object.values(Farmers).reduce((acc, farmer) => acc + Number(farmer.Balance), 0);
+        setSum(balanceSum);
+    }, [trader]);
     return (
         <View style={DashboardStyles.container}>
             <View style={DashboardStyles.header}>
