@@ -9,6 +9,7 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
+URL.js
 .firebase.js
 .env
 .eas.json

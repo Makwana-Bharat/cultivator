@@ -21,6 +21,7 @@ const RegisterScreen = () => {
     //Other
     const [isLoading, setIsLoading] = useState(false);
     const [visible, setVisible] = useState(false);
+    const [msg, setMsg] = useState('');
     const [response, setResponse] = useState(false);
     const navigation = useNavigation();
     const dispatch = useDispatch();
@@ -45,60 +46,65 @@ const RegisterScreen = () => {
         }
         return valid;
     };
-    const handleRegister = () => {
+    const handleRegister = async () => {
         if (validateInputs()) {
             setIsLoading(true);
-            fetch(`${URL}/APIS/Authentication/Register.php`, {
+            await fetch(`${URL}/PHP/SendOTP.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                body: `name=${name}&email=${email}&password=${password}&trade=${trade}&trade_img=${'https://devforum-uploads.s3.dualstack.us-east-2.amazonaws.com/uploads/original/4X/1/0/e/10e6c0a439e17280a6f3fa6ae059819af5517efd.png'}`
-            }).then(response => response.json())
+                body: `EMAIL=${email}`
+            })
+                .then(response => response.json())
                 .then(data => {
                     setResponse(data.status);
-                    setVisible(true)
-                    setIsLoading(false)
-                    if (data.status == "success") {
-                        fetch(`${URL}/APIS/Authentication/Login.php`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            body: `email=${email}&password=${password}`
-                        })
-                            .then(response => response.json())
-                            .then(data => {
-                                setVisible(true);
-                                setIsLoading(false)
-                                setTimeout(() => {
-                                    AsyncStorage.setItem('Auth', data.Trader.SID);
-                                    const modifiedSelection = {
-                                        TraderId: data.Trader.SID,
-                                        FarmerIndex: null,
-                                        FolderIndex: null,
-                                        EntryIndex: null
-                                    };
-                                    dispatch(ModifySelection(modifiedSelection));
-                                    dispatch(setSignIn({
-                                        id: data.Trader.SID,
-                                        isLoggedIn: true,
-                                        traders: data.Trader,
-                                        selection: modifiedSelection
-                                    }));
-                                }, 1000);
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                            });
-                    }
-                    else {
-                        setIsLoading(false)
-                    }
-                })
+                    setMsg(data.message + " check your mail");
+                    setVisible(true);
+                    if (data.status === "success")
+                        setTimeout(() => {
+                            (data.status !== "error") && setVisible(true);
+                            navigation.navigate('OTPVerify', data = { email, password, trade });
+                        }, 1000);
+                }).finally(() => {
+                    setIsLoading(false);
+                });
+            // fetch(`${URL}/APIS/Authentication/Register.php`, {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/x-www-form-urlencoded'
+            //     },
+            //     body: `name=${name}&email=${email}&password=${password}&trade=${trade}&trade_img=${'https://devforum-uploads.s3.dualstack.us-east-2.amazonaws.com/uploads/original/4X/1/0/e/10e6c0a439e17280a6f3fa6ae059819af5517efd.png'}`
+            // }).then(response => response.json())
+            //     .then(async data => {
+            //         setResponse(data.status);
+            //         setVisible(true)
+            //         setIsLoading(false)
+            //         await fetch(`${URL}/PHP/ChangePass.php`, {
+            //             method: 'POST',
+            //             headers: {
+            //                 'Content-Type': 'application/x-www-form-urlencoded'
+            //             },
+            //             body: `EMAIL=${email}`
+            //         })
+            //             .then(response => response.json())
+            //             .then(data => {
+            //                 setResponse(data.status);
+            //                 setMsg(data.message + " check your mail");
+            //                 setVisibleMsg(true);
+            //                 setTimeout(() => {
+            //                     (data.status !== "error") && setVisible(true);
+            //                 }, 1000);
+            //             }).finally(() => {
+            //                 setLoading(false);
+            //             });
+            //         setTimeout(() => {
+
+            //             navigation.navigate('OTPVerify');
+            //         }, 1000);
+            //     })
         }
     };
-
     const navigateToRegister = () => {
         navigation.navigate('Login');
     };
@@ -239,7 +245,7 @@ const RegisterScreen = () => {
                 visible={visible}
                 onDismiss={() => setVisible(false)}>
                 <View style={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingRight: 10, paddingVertical: 2 }}>
-                    <Text style={{ color: response !== "error" ? '#79B046' : '#E57158', fontWeight: 'bold', letterSpacing: .8 }}>{response !== "error" ? `You are registered on ${name}` : 'email already exists..!'}</Text>
+                    <Text style={{ color: response !== "error" ? '#79B046' : '#E57158', fontWeight: 'bold', letterSpacing: .8 }}>{msg}</Text>
                     {response !== "error" && <Feather name='check-circle' color={'#79B046'} size={19} />}
                     {response === "error" && <MaterialIcons name='error-outline' color={'#E57158'} size={19} />}
                 </View>

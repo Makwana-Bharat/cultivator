@@ -7,6 +7,7 @@ import * as Font from 'expo-font';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import ToastManager from 'toastify-react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import Verify from './src/screens/Authentication/Verify';
 export default function App() {
   const [fontLoaded, setFontLoaded] = useState(false);
   async function loadFonts() {
