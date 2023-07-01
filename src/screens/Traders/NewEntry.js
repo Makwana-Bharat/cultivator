@@ -9,12 +9,13 @@ import {
     Alert,
     ActivityIndicator,
 } from 'react-native';
-import { AntDesign, FontAwesome5, FontAwesome } from '@expo/vector-icons';
+import { AntDesign, FontAwesome5, FontAwesome, MaterialIcons, Feather } from '@expo/vector-icons';
 import { Modal } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { addEntry } from '../../redux/slices/authSlice';
 import URL from '../../../config/URL';
+import { Snackbar } from 'react-native-paper';
 const NewEntry = ({ isVisible, setVisible, MFID }) => {
     const [amount, setAmount] = useState('');
     const [detail, setDetail] = useState('');
@@ -23,6 +24,8 @@ const NewEntry = ({ isVisible, setVisible, MFID }) => {
     const [date, setDate] = useState(new Date().toLocaleDateString('en-GB'));
     const [today, setToday] = useState(new Date());
     const [dateVisible, setDateVisible] = useState(false);
+    const [visibleMsg, setVisibleMsg] = useState(false);
+    const [response, setResponse] = useState(false);
     const dispatch = useDispatch();
     const handleEntry = async (type) => {
         if (amount === '' || detail === '') {
@@ -49,16 +52,18 @@ const NewEntry = ({ isVisible, setVisible, MFID }) => {
             body: `MFID=${MFID}&RUPEE=${amount}&DATE=${date}&DETAILS=${detail}&TYPE=${type}`
         }).then(response => response.json()).then(data => {
             dispatch(addEntry({ ...newEntry, IID: data.IID }));
-            if (data.message === "Entry inserted successfully")
-                alert("inserted..");
-            setVisible(false);
-            setLoading1(false);
-            setLoading2(false);
+            setResponse(data.status);
+            setVisibleMsg(true);
+            setTimeout(() => {
+                setVisible(false);
+                setLoading1(false);
+                setLoading2(false);
+            }, 1000);
         }).catch(() => {
+            setVisible(false);
             setLoading1(false);
             setLoading2(false);
         }).finally(() => {
-            setVisible(false);
             setAmount('');
             setDate(new Date().toLocaleDateString('en-GB'));
             setToday(new Date());
@@ -194,6 +199,16 @@ const NewEntry = ({ isVisible, setVisible, MFID }) => {
                     />
                 )}
             </View>
+            <Snackbar
+                style={{ backgroundColor: '#1F242B', }}
+                visible={visibleMsg}
+                onDismiss={() => setVisibleMsg(false)}>
+                <View style={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingRight: 10, paddingVertical: 2 }}>
+                    <Text style={{ color: response !== "error" ? '#79B046' : '#E57158', fontWeight: 'bold', letterSpacing: .8 }}>{response !== "error" ? `સફળતાપૂર્વક નોંધ ઉમેરાઇ` : 'કૈંક વાંધો છે..!'}</Text>
+                    {response !== "error" && <Feather name='check-circle' color={'#79B046'} size={19} />}
+                    {response === "error" && <MaterialIcons name='error-outline' color={'#E57158'} size={19} />}
+                </View>
+            </Snackbar>
         </Modal>
     );
 };

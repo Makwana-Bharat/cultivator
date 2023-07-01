@@ -240,10 +240,7 @@ const UpdateFarmerInfo = ({ isVisible, setVisible, farmer, id, setMsg, setVisibl
 };
 
 /*  Delete Farmer*/
-const DeleteFarmer = ({ isVisible, setVisible, id }) => {
-    const [visibleMsg, setVisibleMsg] = useState(false);
-    const [msg, setMsg] = useState('');
-    const [response, setResponse] = useState(false);
+const DeleteFarmer = ({ isVisible, setVisible, id, setMsg, setVisibleMsg, setResponse }) => {
     const [isLoading, setLoading] = useState(false);
     const naviation = useNavigation()
     const dispatch = useDispatch();
@@ -258,7 +255,7 @@ const DeleteFarmer = ({ isVisible, setVisible, id }) => {
         }).then(response => response.json())
             .then(data => {
                 setResponse(data.status)
-                setMsg(data.status === "success" ? 'ખેડૂતની માહિતી સુધારાઈ..' : 'કૈંક વાંધો છે.. ');
+                setMsg(data.status === "success" ? 'ખેડૂત હટવાયો..' : 'કૈંક વાંધો છે.. ');
                 setVisibleMsg(true)
                 setTimeout(() => {
                     dispatch(removeFarmer(id.FarmerIndex));
@@ -293,20 +290,10 @@ const DeleteFarmer = ({ isVisible, setVisible, id }) => {
                     <TouchableOpacity style={[DeleteStyles.button, { backgroundColor: '#E57158', borderColor: '#E57158' }]} onPress={deleteIt}><Text style={DeleteStyles.buttonText}>{isLoading ? <ActivityIndicator color={'#fff'} /> : 'Delete It!'}</Text></TouchableOpacity>
                 </View>
             </View>
-            <Snackbar
-                style={{ backgroundColor: '#1F242B', position: 'absolute', bottom: 0, left: 0 }}
-                visible={visibleMsg}
-                onDismiss={() => setVisibleMsg(false)}>
-                <View style={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingRight: 10, paddingVertical: 2 }}>
-                    <Text style={{ color: response !== "error" ? '#79B046' : '#E57158', fontWeight: 'bold', letterSpacing: .8 }}>{msg}</Text>
-                    {response !== "error" && <Feather name='check-circle' color={'#79B046'} size={19} />}
-                    {response === "error" && <MaterialIcons name='error-outline' color={'#E57158'} size={19} />}
-                </View>
-            </Snackbar>
         </Modal>
     );
 };
-const DeleteFolder = ({ isVisible, setVisible, id }) => {
+const DeleteFolder = ({ isVisible, setVisible, id, setMsg, setVisibleMsg, setResponse }) => {
     const [isLoading, setLoading] = useState(false);
     const naviation = useNavigation()
     const dispatch = useDispatch();
@@ -321,10 +308,14 @@ const DeleteFolder = ({ isVisible, setVisible, id }) => {
                 body: `MFID=${id.FolderIndex}&ID=${id.FarmerIndex}`
             }).then(response => response.json())
                 .then(data => {
-                    console.log(data)
-                    dispatch(removeFolder(id.FolderIndex));
-                    dispatch(ModifySelection({ ...id, FolderIndex: null }));
-                    Alert.alert('ફોલ્ડર હટાવાયુ.. !')
+                    setResponse(data.status)
+                    setMsg(data.status === "success" ? 'ફોલ્ડર હટાવાયુ..' : 'કૈંક વાંધો છે.. ');
+                    setVisibleMsg(true)
+                    setTimeout(() => {
+                        dispatch(removeFolder(id.FolderIndex));
+                        dispatch(ModifySelection({ ...id, FolderIndex: null }));
+                    }, 1000);
+
                 });
         } catch (error) {
             console.log(error)
@@ -468,8 +459,10 @@ const Folders = () => {
                     ...newFolder,
                     MFID: data.MFID
                 };
+                setResponse(data.status)
+                setMsg(data.status === "success" ? 'ફોલ્ડર ઉમેરાયું..' : 'કૈંક વાંધો છે.. ');
+                setVisibleMsg(true)
                 dispatch(addFolder(updatedFolder));
-                alert('ફોલ્ડર ઉમેરાયું છે..');
             })
             .catch(console.log)
             .finally(() => {
@@ -563,7 +556,7 @@ const Folders = () => {
             />
             <ViewFarmerInfo isVisible={ViewInfo} setVisible={setViewInfo} farmer={trade.Farmer[selecedIndex.FarmerIndex]} />
             <UpdateFarmerInfo isVisible={UpdateInfo} setVisible={setUpdateInfo} farmer={trade.Farmer[selecedIndex.FarmerIndex]} id={selecedIndex} setVisibleMsg={setVisibleMsg} setMsg={setMsg} setResponse={setResponse} />
-            <DeleteFarmer isVisible={DeleteInfo} setVisible={setDeleteInfo} id={selecedIndex} />
+            <DeleteFarmer isVisible={DeleteInfo} setVisible={setDeleteInfo} id={selecedIndex} setVisibleMsg={setVisibleMsg} setMsg={setMsg} setResponse={setResponse} />
             <DeleteFolder isVisible={DeleteFolderInfo} setVisible={setDeleteFolderInfo} id={selecedIndex} setVisibleMsg={setVisibleMsg} setMsg={setMsg} setResponse={setResponse} />
             <Snackbar
                 style={{ backgroundColor: '#1F242B', }}

@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign, MaterialIcons, Feather } from '@expo/vector-icons';
 import { Modal } from 'react-native-paper';
 import URL from '../../../config/URL';
 import { useNavigation } from '@react-navigation/native';
+import { Snackbar } from 'react-native-paper';
 const VerifyOTP = ({ isVisible, setVisible }) => {
     const [isLoading, setLoading] = useState(false);
     const [OTP, setOTP] = useState();
+    const [visibleMsg, setVisibleMsg] = useState(false);
+    const [msg, setMsg] = useState('');
+    const [response, setResponse] = useState(false);
     const naviation = useNavigation();
     const Verify = async () => {
         setLoading(true);
@@ -19,12 +23,15 @@ const VerifyOTP = ({ isVisible, setVisible }) => {
         })
             .then(response => response.json())
             .then(data => {
-
-                (data.status !== "error") && naviation.navigate('Reset');
-                Alert.alert(data.status, data.message)
+                setResponse(data.status);
+                setMsg(data.message);
+                setVisibleMsg(true);
+                setTimeout(() => {
+                    (data.status !== "error") && naviation.navigate('Reset');
+                    setVisible(false);
+                }, 2000);
             }).finally(() => {
                 setLoading(false);
-                setVisible(false);
             });
     };
     return (
@@ -64,6 +71,16 @@ const VerifyOTP = ({ isVisible, setVisible }) => {
                     </TouchableOpacity>
                 </View>
             </View>
+            <Snackbar
+                style={{ backgroundColor: '#1F242B', position: 'absolute', bottom: 0, left: 0 }}
+                visible={visibleMsg}
+                onDismiss={() => setVisibleMsg(false)}>
+                <View style={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingRight: 10, paddingVertical: 2 }}>
+                    <Text style={{ color: response !== "error" ? '#79B046' : '#E57158', fontWeight: 'bold', letterSpacing: .8 }}>{msg}</Text>
+                    {response !== "error" && <Feather name='check-circle' color={'#79B046'} size={19} />}
+                    {response === "error" && <MaterialIcons name='error-outline' color={'#E57158'} size={19} />}
+                </View>
+            </Snackbar>
         </Modal>
     );
 };

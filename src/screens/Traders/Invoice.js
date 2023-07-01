@@ -20,7 +20,7 @@ export const Invoice = () => {
     const [Jama, setJama] = useState({});
     const dispatch = useDispatch();
     var Invoice = null;
-    if (!(selectedIndex.FarmerIndex === null || selectedIndex.FarmerIndex === undefined || selectedIndex.FolderIndex === null || selectedIndex.FolderIndex === undefined))
+    if (!(selectedIndex.FarmerIndex === null || selectedIndex.FarmerIndex === undefined || selectedIndex.FolderIndex === null || selectedIndex.FolderIndex === undefined || trader.Farmer[selectedIndex.FarmerIndex] === undefined || trader.Farmer[selectedIndex.FarmerIndex].Folder === undefined || trader.Farmer[selectedIndex.FarmerIndex].Folder[selectedIndex.FolderIndex] === undefined))
         Invoice = trader.Farmer[selectedIndex.FarmerIndex].Folder[selectedIndex.FolderIndex].Invoice;
     useEffect(() => {
         let udharTotal = 0;
@@ -72,7 +72,7 @@ export const Invoice = () => {
         )
     }
     const navigation = useNavigation();
-    if (selectedIndex.FarmerIndex === null || selectedIndex.FarmerIndex === undefined || selectedIndex.FolderIndex === null || selectedIndex.FolderIndex === undefined)
+    if ((selectedIndex.FarmerIndex === null || selectedIndex.FarmerIndex === undefined || selectedIndex.FolderIndex === null || selectedIndex.FolderIndex === undefined || trader.Farmer[selectedIndex.FarmerIndex] === undefined || trader.Farmer[selectedIndex.FarmerIndex].Folder === undefined || trader.Farmer[selectedIndex.FarmerIndex].Folder[selectedIndex.FolderIndex] === undefined))
         return <></>
     else
         return (
