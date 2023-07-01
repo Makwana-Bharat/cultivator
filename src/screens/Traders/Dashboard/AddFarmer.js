@@ -161,7 +161,7 @@ const AddFarmer = ({ isVisible, setVisible }) => {
             visible={visibleMsg}
             onDismiss={() => setVisibleMsg(false)}>
             <View style={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingRight: 10, paddingVertical: 2 }}>
-                <Text style={{ color: response !== "error" ? '#79B046' : '#E57158', fontWeight: 'bold', letterSpacing: .8 }}>{response !== "error" ? `સફળતાપૂર્વક ખેડૂત ઉમેરાયો` : 'કૈંક વાંધો છે..!'}</Text>
+                <Text style={{ color: response !== "error" ? '#79B046' : '#E57158', fontWeight: 'bold', letterSpacing: .8 }}>{response !== "error" ? `સફળતાપૂર્વક ખેડૂત ઉમેરાયો` : 'મોબાઈલ નંબર ઉપલબ્ધ છે..!'}</Text>
                 {response !== "error" && <Feather name='check-circle' color={'#79B046'} size={19} />}
                 {response === "error" && <MaterialIcons name='error-outline' color={'#E57158'} size={19} />}
             </View>
