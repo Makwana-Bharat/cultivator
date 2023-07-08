@@ -7,9 +7,12 @@ import { selectIsLoggedIn, ModifySelection, setSignIn } from '../redux/slices/au
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import URL from '../../config/URL';
 import Loading from './Loading';
+import { checkOnboarding, HandleOnboarding } from '../redux/slices/setting';
+import OnboardingScreen from '../Onboarding/Slider';
 const AppRoute = () => {
     const [loading, setLoading] = useState(true);
     const isLoggedIn = useSelector(selectIsLoggedIn);
+    const showOnboading = useSelector(checkOnboarding);
     const dispatch = useDispatch();
     const fetchData = async (SID) => {
         await fetch(`${URL}/APIS/Authentication/Read.php`, {
@@ -58,10 +61,20 @@ const AppRoute = () => {
     useEffect(() => {
         const checkAuth = async () => {
             try {
+                const Onboading = await AsyncStorage.getItem("Onboarding");
                 const authValue = await AsyncStorage.getItem('Auth');
-                if (authValue !== null) {
-                    await fetchData(authValue);
-                } else {
+                if (Onboading === "set") {
+                    dispatch(HandleOnboarding(false));
+                    if (authValue !== null) {
+                        await fetchData(authValue);
+                    } else {
+                        setTimeout(() => {
+                            setLoading(false);
+                        }, 2000);
+                    }
+                }
+                else {
+                    dispatch(HandleOnboarding(true));
                     setTimeout(() => {
                         setLoading(false);
                     }, 2000);
@@ -74,7 +87,9 @@ const AppRoute = () => {
     }, []);
     return (
         <NavigationContainer>
-            {loading ? (
+            {showOnboading ? (
+                <OnboardingScreen />
+            ) : loading ? (
                 <Loading />
             ) : isLoggedIn ? (
                 <AppNavigator />

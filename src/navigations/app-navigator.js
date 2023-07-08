@@ -5,7 +5,7 @@ import { DashboardScreen } from '../screens/Traders/DashboardScreen';
 import {
     createDrawerNavigator,
 } from '@react-navigation/drawer';
-import { AntDesign, Entypo, MaterialIcons, Feather } from '@expo/vector-icons';
+import { AntDesign, Entypo, MaterialIcons, Feather, FontAwesome5 } from '@expo/vector-icons';
 import { Invoice } from '../screens/Traders/Invoice';
 import { setSignOut } from '../redux/slices/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,6 +14,8 @@ import NewEntry from '../screens/Traders/NewEntry';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Folders from '../screens/Traders/Folder';
 import { Snackbar } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+import EditProfile from '../screens/Traders/EditProfile';
 const Drawer = createDrawerNavigator();
 const CustomHeader = ({ navigation }) => {
     const user = useSelector(state => state.userAuth);
@@ -41,6 +43,7 @@ const CustomHeader = ({ navigation }) => {
 const AppNavigator = () => {
     const [visibleMsg, setVisibleMsg] = useState(false);
     const [response, setResponse] = useState(false);
+    const navigation = useNavigation();
     const CustomDrawerContent = (props) => {
         const dispatch = useDispatch();
         const BillHeading = useSelector(selectBillHeading);
@@ -82,6 +85,11 @@ const AppNavigator = () => {
                                 borderWidth: 5,
                             }}
                         />
+                        <TouchableOpacity style={{ backgroundColor: 'rgba(255,255,255,.6)', padding: 2, borderRadius: 50, width: 40, height: 40, display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', top: -40, left: 45 }}
+                            onPress={() => navigation.navigate(EditProfile)}
+                        >
+                            <FontAwesome5 name="pen" size={20} color={'#31363C'} />
+                        </TouchableOpacity>
                         <Text style={{ color: '#fff', marginTop: 10, fontSize: 24, fontWeight: 'bold' }}>
                             {user.traders.TRADE}
                         </Text>
@@ -162,6 +170,7 @@ const AppNavigator = () => {
                 <Drawer.Screen name='Folders' component={Folders} options={{ headerShown: true }} />
                 <Drawer.Screen name='Invoice' component={Invoice} options={{ headerShown: true }} />
                 <Drawer.Screen name='NewEntry' component={NewEntry} options={{ headerShown: false }} />
+                <Drawer.Screen name='EditProfile' component={EditProfile} options={{ headerShown: false }} />
             </Drawer.Navigator>
             <Snackbar
                 style={{ backgroundColor: '#1F242B', }}

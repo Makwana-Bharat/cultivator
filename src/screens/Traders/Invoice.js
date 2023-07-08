@@ -72,6 +72,8 @@ export const Invoice = () => {
         )
     }
     const navigation = useNavigation();
+    const user = useSelector(state => state.userAuth);
+    const trade = user.traders.TRADE;
     if ((selectedIndex.FarmerIndex === null || selectedIndex.FarmerIndex === undefined || selectedIndex.FolderIndex === null || selectedIndex.FolderIndex === undefined || trader.Farmer[selectedIndex.FarmerIndex] === undefined || trader.Farmer[selectedIndex.FarmerIndex].Folder === undefined || trader.Farmer[selectedIndex.FarmerIndex].Folder[selectedIndex.FolderIndex] === undefined))
         return <></>
     else
@@ -96,7 +98,7 @@ export const Invoice = () => {
                     {/** Invoice*/}
                     <View style={{ backgroundColor: 'rgba(255,255,255,.1)', height: '90%', borderRadius: 10, padding: 10 }}>
                         <View style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                            {Header && <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold', marginBottom: 10 }}>રામદેવ ટ્રેડીંગ </Text>}
+                            {Header && <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold', marginBottom: 10 }}>{trade}</Text>}
                             <View style={{ width: '100%', display: 'flex', justifyContent: 'space-between', flexDirection: 'row', marginBottom: 10 }}>
                                 <View style={{ display: 'flex', flexDirection: 'row' }}>
                                     <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 9 }}>ખેડૂતનું નામ:</Text>

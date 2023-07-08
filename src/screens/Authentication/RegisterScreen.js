@@ -64,45 +64,11 @@ const RegisterScreen = () => {
                     if (data.status === "success")
                         setTimeout(() => {
                             (data.status !== "error") && setVisible(true);
-                            navigation.navigate('OTPVerify', data = { email, password, trade });
+                            navigation.navigate('OTPVerify', data = { name, email, password, trade });
                         }, 1000);
                 }).finally(() => {
                     setIsLoading(false);
                 });
-            // fetch(`${URL}/APIS/Authentication/Register.php`, {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/x-www-form-urlencoded'
-            //     },
-            //     body: `name=${name}&email=${email}&password=${password}&trade=${trade}&trade_img=${'https://devforum-uploads.s3.dualstack.us-east-2.amazonaws.com/uploads/original/4X/1/0/e/10e6c0a439e17280a6f3fa6ae059819af5517efd.png'}`
-            // }).then(response => response.json())
-            //     .then(async data => {
-            //         setResponse(data.status);
-            //         setVisible(true)
-            //         setIsLoading(false)
-            //         await fetch(`${URL}/PHP/ChangePass.php`, {
-            //             method: 'POST',
-            //             headers: {
-            //                 'Content-Type': 'application/x-www-form-urlencoded'
-            //             },
-            //             body: `EMAIL=${email}`
-            //         })
-            //             .then(response => response.json())
-            //             .then(data => {
-            //                 setResponse(data.status);
-            //                 setMsg(data.message + " check your mail");
-            //                 setVisibleMsg(true);
-            //                 setTimeout(() => {
-            //                     (data.status !== "error") && setVisible(true);
-            //                 }, 1000);
-            //             }).finally(() => {
-            //                 setLoading(false);
-            //             });
-            //         setTimeout(() => {
-
-            //             navigation.navigate('OTPVerify');
-            //         }, 1000);
-            //     })
         }
     };
     const navigateToRegister = () => {
@@ -291,7 +257,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10
     },
     button: {
-        width: 150,
+        width: 160,
         backgroundColor: '#1F242B',
         paddingHorizontal: 45,
         paddingVertical: 15,
