@@ -30,7 +30,7 @@ const CustomHeader = ({ navigation }) => {
                 <AntDesign name="menu-unfold" size={24} color="white" />
             </TouchableOpacity>
             <Text style={styles.heading}>{trade}</Text>
-            <TouchableOpacity style={styles.profileImage} onPress={() => alert('પ્રોફાઇલ સર્વિસ ઉપલબ્ધ નથી.. ')}>
+            <TouchableOpacity style={styles.profileImage} onPress={() => navigation.navigate(EditProfile)}>
                 <Image source={{ uri: tradeImg }} style={{
                     height: '100%',
                     width: '100%',
